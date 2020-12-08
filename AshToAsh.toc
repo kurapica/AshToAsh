@@ -1,0 +1,19 @@
+## Interface: 90002
+## Title: AshToAsh
+## Author: kurapica125@outlook.com
+## Version: r001
+## Notes: A skin supported raid panel with full features
+## Dependencies: Scorpio.Unit
+## DefaultState: Enabled
+## LoadOnDemand: 0
+## SavedVariablesPerCharacter: AshToAsh_DB
+
+# Localization
+# localization\zhCN.lua
+
+# Core
+AshToAsh.lua
+Template.lua
+
+# Skin
+DefaultSkin.lua
