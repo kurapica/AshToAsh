@@ -3,7 +3,7 @@
 ## Author: kurapica125@outlook.com
 ## Version: r001
 ## Notes: A skin supported raid panel with full features
-## Dependencies: Scorpio.Unit
+## Dependencies: Scorpio.Unit, Scorpio.Widget
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariablesPerCharacter: AshToAsh_DB
@@ -14,6 +14,7 @@
 # Core
 AshToAsh.lua
 Template.lua
+SpellBinding.lua
 
 # Skin
 DefaultSkin.lua
