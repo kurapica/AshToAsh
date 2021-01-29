@@ -10,11 +10,6 @@ Scorpio           "AshToAsh.Skin.Default"            "1.0.0"
 --========================================================--
 
 -----------------------------------------------------------
--- Aura Panel Icon
------------------------------------------------------------
-__Sealed__() class "AshAuraPanelIcon"   { Scorpio.Secure.UnitFrame.AuraPanelIcon }
-
------------------------------------------------------------
 -- SHARE SETTINGS
 -----------------------------------------------------------
 BORDER_SIZE                     = 1
@@ -76,8 +71,8 @@ AURA_PANEL_ICON_DEBUFF_COLOR    = {
 -- Default Indicator and Style settings
 -----------------------------------------------------------
 Style.UpdateSkin("Default",     {
-    [AshAuraPanelIcon]          = {
-        enableMouse             = true, -- turn false to get more space for cursor operations
+    [AshClassPanelIcon]         = {
+        enableMouse             = false,
 
         backdrop                = {
             edgeFile            = [[Interface\Buttons\WHITE8x8]],
@@ -104,8 +99,12 @@ Style.UpdateSkin("Default",     {
         -- Duration
         Cooldown                = {
             setAllPoints        = true,
+            enableMouse         = false,
             cooldown            = Wow.FromPanelProperty("AuraCooldown"),
         },
+    },
+    [AshAuraPanelIcon]          = {
+        enableMouse             = true,
     },
 
     -- Indicators for Unit Frames
@@ -155,6 +154,58 @@ Style.UpdateSkin("Default",     {
         },
         DisconnectIcon          = {
             location            = { Anchor("BOTTOMLEFT") },
+        },
+
+        -- Aura Panels
+        BuffPanel               = {
+            elementType         = AshAuraPanelIcon,
+            rowCount            = 2,
+            columnCount         = 3,
+            elementWidth        = 16,
+            elementHeight       = 16,
+            hSpacing            = 1,
+            vSpacing            = 1,
+            orientation         = Orientation.HORIZONTAL,
+            topToBottom         = true,
+            leftToRight         = true,
+            location            = { Anchor("TOPLEFT") },
+
+            auraPriority        = SUBJECT_BUFF_PRIORITY,
+            auraFilter          = "HELPFUL|PLAYER",
+
+            customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return not _AuraBlackList[spellID] end,
+        },
+        DebuffPanel             = {
+            elementType         = AshAuraPanelIcon,
+            rowCount            = 2,
+            columnCount         = 3,
+            elementWidth        = 16,
+            elementHeight       = 16,
+            hSpacing            = 1,
+            vSpacing            = 1,
+            orientation         = Orientation.VERTICAL,
+            topToBottom         = false,
+            leftToRight         = false,
+            location            = { Anchor("BOTTOMRIGHT", 0, 0, "PredictionHealthBar") },
+
+            auraFilter          = "HARMFUL",
+            customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return not _AuraBlackList[spellID] end,
+        },
+        ClassBuffPanel          = {
+            elementType         = AshClassPanelIcon,
+            rowCount            = 2,
+            columnCount         = 1,
+            elementWidth        = 18,
+            elementHeight       = 18,
+            hSpacing            = 1,
+            vSpacing            = 1,
+            orientation         = Orientation.HORIZONTAL,
+            topToBottom         = false,
+            leftToRight         = true,
+            location            = { Anchor("BOTTOM", 0, 0, "PredictionHealthBar") },
+
+            auraFilter          = "HELPFUL",
+            customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return _ClassBuffList[name] or _ClassBuffList[spellID] end,
         },
     },
 

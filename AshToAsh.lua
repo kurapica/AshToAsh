@@ -12,6 +12,7 @@ Scorpio           "AshToAsh"                         "1.0.0"
 namespace "AshToAsh"
 
 import "Scorpio.Secure"
+import "System.Reactive"
 
 -- The hover spell group
 HOVER_SPELL_GROUP               = "AshToAsh"
@@ -29,13 +30,73 @@ DEFAULT_CLASS_SORT_ORDER        = { "WARRIOR", "DEATHKNIGHT", "PALADIN", "MONK",
 DEFAULT_ROLE_SORT_ORDER         = { "MAINTANK", "MAINASSIST", "TANK", "HEALER", "DAMAGER", "NONE"}
 DEFAULT_GROUP_SORT_ORDER        = { 1, 2, 3, 4, 5, 6, 7, 8 }
 
+SUBJECT_BUFF_PRIORITY           = BehaviorSubject()
+
 -----------------------------------------------------------
 -- Addon Event Handler
 -----------------------------------------------------------
 function OnLoad()
-    _SVDB                       = SVManager.SVCharManager("AshToAsh_DB")
+    _SVDB                       = SVManager("AshToAsh_DB", "AshToAsh_CharDB")
 
-    _SVDB.Spec:SetDefault{
+    _SVDB:SetDefault{
+        AuraBlackList           = {},
+        ClassBuffList           = {},
+    }
+
+    -- Global Settings
+    _AuraBlackList              = _SVDB.AuraBlackList
+    _ClassBuffList              = _SVDB.ClassBuffList
+
+    if not next(_ClassBuffList) then
+        -- Paladin
+        _ClassBuffList[132403]  = true  -- Shield of the Righteous
+        _ClassBuffList[31850]   = true  -- Ardent Defender
+        _ClassBuffList[86659]   = true  -- Guardian of Ancient Kings
+        _ClassBuffList[1022]    = true  -- Blessing of Protection
+        _ClassBuffList[642]     = true  -- Divine Shield
+
+        -- Death Knight
+        _ClassBuffList[48707]   = true  -- Anti-Magic Shell
+        _ClassBuffList[55233]   = true  -- Vampiric Blood
+        _ClassBuffList[81256]   = true  -- Dancing Rune Weapon
+        _ClassBuffList[195181]  = true  -- Bone Shield
+        _ClassBuffList[194679]  = true  -- Rune Tap
+        _ClassBuffList[206977]  = true  -- Blood Mirror
+        _ClassBuffList[48792]   = true  -- Icebound Fortitude
+        _ClassBuffList[207319]  = true  -- Corpse Shield
+
+        -- Warrior
+        _ClassBuffList[184364]  = true  -- Enraged Regeneration
+        _ClassBuffList[23920]   = true  -- Spell Reflection
+        _ClassBuffList[132404]  = true  -- Shield Block
+        _ClassBuffList[190456]  = true  -- Ignore Pain
+        _ClassBuffList[871]     = true  -- Shield Wall
+        _ClassBuffList[12975]   = true  -- Last Stand
+
+        -- Monk
+        _ClassBuffList[125174]  = true  -- Touch of Karma
+        _ClassBuffList[122783]  = true  -- Diffuse Magic
+        _ClassBuffList[122278]  = true  -- Dampen Harm
+        _ClassBuffList[120954]  = true  -- Fortifying Brew
+        _ClassBuffList[215479]  = true  -- Ironskin Brew
+
+        -- Druid
+        _ClassBuffList[192081]  = true  -- Ironfur
+        _ClassBuffList[192083]  = true  -- Mark of Ursol
+        _ClassBuffList[200851]  = true  -- Rage of the Sleeper
+        _ClassBuffList[22812]   = true  -- Barkskin
+        _ClassBuffList[22842]   = true  -- Frenzied Regeneration
+
+        -- Demon Hunter
+        _ClassBuffList[218256]  = true  -- Empower Wards
+        _ClassBuffList[187827]  = true  -- Metamorphosis
+        _ClassBuffList[203819]  = true  -- Demon Spikes
+        _ClassBuffList[203981]  = true  -- Soul Fragments
+    end
+
+    -- Spec Settings
+    _SVDB.Char.Spec:SetDefault{
+        AuraPriority            = {},
         Panels                  = {
             [1]                 = {
                 Type            = PanelType.Unit,
@@ -76,7 +137,7 @@ function OnSpecChanged()
     local idxMap                = {}
     CURRENT_UNIT_PANELS:Clear()
 
-    for i, panel in ipairs(_SVDB.Spec.Panels) do
+    for i, panel in ipairs(_SVDB.Char.Spec.Panels) do
         local index             = (idxMap[panel.Type] or 0) + 1
         local panelCache        = UNIT_PANELS[panel.Type]
         local upanel            = panelCache[index]
@@ -113,6 +174,8 @@ function OnSpecChanged()
             cache[i].Index      = -1
         end
     end
+
+    SUBJECT_BUFF_PRIORITY:OnNext(_SVDB.Char.Spec.AuraPriority)
 end
 
 -----------------------------------------------------------
@@ -197,27 +260,30 @@ function ReLocation(self)
 
         local location
 
+        -- Auto Attach
         if math.abs(top - panel:GetBottom()) <= 10 then
             location            = self:GetLocation({ Anchor("TOPLEFT", 0, 0, panel:GetName(), "BOTTOMLEFT") })
+            location[1].x       = 0
         elseif math.abs(bottom - panel:GetTop()) <= 10 then
             location            = self:GetLocation({ Anchor("BOTTOMLEFT", 0, 0, panel:GetName(), "TOPLEFT") })
+            location[1].x       = 0
         elseif math.abs(left - panel:GetRight()) <= 10 then
             location            = self:GetLocation({ Anchor("TOPLEFT", 0, 0, panel:GetName(), "TOPRIGHT") })
+            location[1].y       = 0
         elseif math.abs(right - panel:GetLeft()) <= 10 then
             location            = self:GetLocation({ Anchor("TOPRIGHT", 0, 0, panel:GetName(), "TOPLEFT") })
+            location[1].y       = 0
         end
 
         if location then
-            location[1].x          = 0
-            location[1].y          = 0
-            _SVDB.Spec.Panels[self.Index].Style.location = location
+            _SVDB.Char.Spec.Panels[self.Index].Style.location = location
             Style[self].location= location
             return
         end
     end
 
     local location              = self:GetLocation({ Anchor("TOPLEFT", 0, 0, nil, "CENTER") })
-    _SVDB.Spec.Panels[self.Index].Style.location = location
+    _SVDB.Char.Spec.Panels[self.Index].Style.location = location
     Style[self].location= location
 end
 
@@ -361,8 +427,7 @@ function GetWatchUnits(self, panel)
             end,
         },
         {
-            text                = "----------------------------------",
-            disabled            = true,
+            separator           = true,
         },
     }
 
@@ -385,7 +450,7 @@ function AddPanel(self, type)
     NoCombat()
 
     if type == PanelType.UnitWatch then
-        table.insert(_SVDB.Spec.Panels, {
+        table.insert(_SVDB.Char.Spec.Panels, {
             Type                    = type,
             Style                   = {
                 location            = { Anchor("TOPLEFT", 0, 0, self:GetName(), "TOPRIGHT") },
@@ -408,7 +473,7 @@ function AddPanel(self, type)
             }
         })
     else
-        table.insert(_SVDB.Spec.Panels, {
+        table.insert(_SVDB.Char.Spec.Panels, {
             Type                    = type,
             Style                   = {
                 location            = { Anchor("TOPLEFT", 0, 0, self:GetName(), "TOPRIGHT") },
@@ -467,7 +532,7 @@ function DeletePanel(self)
         end
     end
 
-    table.remove(_SVDB.Spec.Panels, index)
+    table.remove(_SVDB.Char.Spec.Panels, index)
 
     LockPanels()
     OnSpecChanged()
@@ -475,7 +540,7 @@ function DeletePanel(self)
 end
 
 function OpenMenu(self)
-    local panel                 = _SVDB.Spec.Panels[self.Index]
+    local panel                 = _SVDB.Char.Spec.Panels[self.Index]
     if not panel then return end
 
     ShowDropDownMenu{
@@ -518,8 +583,7 @@ function OpenMenu(self)
             disabled            = self.Index == 1,
         },
         {
-            text                = "----------------------------------",
-            disabled            = true,
+            separator           = true,
         },
         {
             text                = _Locale["Panel Settings"],
@@ -650,7 +714,7 @@ function OpenMenu(self)
                 {
                     text        = _Locale["Show Enemy Only"],
                     check       = {
-                        get     = function() return panel.Style.ShowEnemyOnly end,
+                        get     = function() return panel.Style.showEnemyOnly end,
                         set     = function(value)
                             panel.Style.showEnemyOnly = value
                             Style[self].ShowEnemyOnly = value
@@ -662,7 +726,7 @@ function OpenMenu(self)
                 {
                     text        = _Locale["Activated"],
                     check       = {
-                        get     = function() return panel.Style.Activated end,
+                        get     = function() return panel.Style.activated end,
                         set     = function(value)
                             panel.Style.activated = value
                             Style[self].activated = value

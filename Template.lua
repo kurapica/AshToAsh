@@ -171,3 +171,33 @@ __Sealed__() class "AshUnitWatchPanel" (function(_ENV)
     -- Whether the panel is only activated during combat
     property "ActivatedInCombat"{ handler = Refresh, type = Boolean, default = false }
 end)
+
+-- Aura Panel Icon
+__Sealed__() class "AshClassPanelIcon" { Scorpio.Secure.UnitFrame.AuraPanelIcon }
+
+__Sealed__() class "AshAuraPanelIcon" (function(_ENV)
+    inherit "AshClassPanelIcon"
+
+    local function OnMouseUp(self, button)
+        local parent            = self:GetParent()
+        if not parent then return end
+        if IsAltKeyDown() and button == "RightButton" then
+            local name, _, _, _, _, _, _, _, _, spellID = UnitAura(parent.Unit, self.AuraIndex, parent.Filter)
+
+            if name then
+                _AuraBlackList[spellID] = true
+
+                -- Force the refreshing
+                parent.Refresh  = parent.Unit
+            end
+        end
+    end
+
+    ------------------------------------------------------
+    -- Constructor
+    ------------------------------------------------------
+    function __ctor(self)
+        super(self)
+        self.OnMouseUp          = self.OnMouseUp + OnMouseUp
+    end
+end)

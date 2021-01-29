@@ -6,7 +6,8 @@
 ## Dependencies: Scorpio.Unit, Scorpio.Widget
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
-## SavedVariablesPerCharacter: AshToAsh_DB
+## SavedVariables: AshToAsh_DB
+## SavedVariablesPerCharacter: AshToAsh_CharDB
 
 # Localization
 # localization\zhCN.lua
