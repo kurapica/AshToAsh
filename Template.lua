@@ -188,7 +188,7 @@ __Sealed__() class "AshAuraPanelIcon" (function(_ENV)
                 _AuraBlackList[spellID] = true
 
                 -- Force the refreshing
-                parent.Refresh  = parent.Unit
+                Scorpio.FireSystemEvent("UNIT_AURA", "any")
             end
         end
     end
