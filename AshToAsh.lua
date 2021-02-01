@@ -13,6 +13,7 @@ namespace "AshToAsh"
 
 import "Scorpio.Secure"
 import "System.Reactive"
+import "System.Text"
 
 -- The hover spell group
 HOVER_SPELL_GROUP               = "AshToAsh"
@@ -82,13 +83,11 @@ function OnLoad()
 
         -- Druid
         _ClassBuffList[192081]  = true  -- Ironfur
-        _ClassBuffList[192083]  = true  -- Mark of Ursol
         _ClassBuffList[200851]  = true  -- Rage of the Sleeper
         _ClassBuffList[22812]   = true  -- Barkskin
         _ClassBuffList[22842]   = true  -- Frenzied Regeneration
 
         -- Demon Hunter
-        _ClassBuffList[218256]  = true  -- Empower Wards
         _ClassBuffList[187827]  = true  -- Metamorphosis
         _ClassBuffList[203819]  = true  -- Demon Spikes
         _ClassBuffList[203981]  = true  -- Soul Fragments
@@ -106,7 +105,7 @@ function OnLoad()
                     activated           = true,
                     activatedInCombat   = false,
 
-                    columnCount         = 8,
+                    columnCount         = 4,
                     rowCount            = 5,
                     elementWidth        = 80,
                     elementHeight       = 32,
@@ -159,7 +158,9 @@ function OnSpecChanged()
         upanel.Index            = i
 
         -- Init with count
-        upanel.Count            = math.min(panel.Type == PanelType.Pet and 10 or 25, panel.Style.columnCount * panel.Style.rowCount)
+        if panel.Type ~= PanelType.UnitWatch then
+            upanel.Count        = math.min(panel.Type == PanelType.Pet and 10 or 25, panel.Style.columnCount * panel.Style.rowCount)
+        end
 
         idxMap[panel.Type]      = index
         CURRENT_UNIT_PANELS[i]  = upanel
@@ -235,6 +236,186 @@ function RECYCLE_MASKS:OnPush(mask)
     mask:SetParent(HIDDEN_FRAME)
     mask:GetChild("KeyBindText"):SetText("")
 end
+
+-----------------------------------------------------------
+-- Aura List UI
+-----------------------------------------------------------
+Browser                         = Dialog("AshToAsh_Aura_List")
+Browser:Hide()
+
+input                           = InputBox     ("Input",  Browser)
+viewer                          = HtmlViewer   ("Viewer", Browser)
+addButton                       = UIPanelButton("Add",    Browser)
+
+TEMPLATE_AURA                   = TemplateString[[
+    <html>
+        <body>
+            @for id in pairs(target) do
+            @if tonumber(id) then
+            <p><a href="@id">[@GetSpellInfo(id)]</a></p>
+            @else
+            <p><a href="@id">[@id]</a></p>
+            @end end
+        </body>
+    </html>
+]]
+
+Style[Browser]                  = {
+    Header                      = { Text = "AshToAsh" },
+    Size                        = Size(300, 400),
+    clampedToScreen             = true,
+    minResize                   = Size(100, 100),
+
+    Input                       = {
+        location                = { Anchor("TOPLEFT", 24, -32), Anchor("RIGHT", -100) },
+        height                  = 32,
+    },
+
+    Add                         = {
+        location                =  { Anchor("RIGHT", -24, 0), Anchor("LEFT", 8, 0, "Input", "RIGHT") },
+        text                    = _Locale["Add"],
+        height                  = 32,
+    },
+
+    Viewer                      = {
+        location                = { Anchor("TOPLEFT", 0, -8, "Input", "BOTTOMLEFT"), Anchor("BOTTOMRIGHT", -48, 48) },
+    },
+}
+
+function viewer:OnHyperlinkClick(id)
+    id                          = tonumber(id) or id
+    Browser.TargetList[id]      = nil
+
+    viewer:SetText(TEMPLATE_AURA{ target = Browser.TargetList })
+end
+
+function viewer:OnHyperlinkEnter(id)
+    id                          = tonumber(id) or id
+    local _,_,_,_,_,_,spellID   = GetSpellInfo(id)
+
+    if spellID then
+        GameTooltip:SetOwner(self, "ANCHOR_CURSOR")
+        GameTooltip:SetSpellByID(spellID)
+        GameTooltip:Show()
+    end
+end
+
+function viewer:OnHyperlinkLeave(id)
+    GameTooltip:Hide()
+end
+
+function addButton:OnClick()
+    local id                    = input:GetText()
+    id                          = id and Toolset.trim(id)
+    id                          = id and tonumber(id) or id
+    local _,_,_,_,_,_,spellID   = GetSpellInfo(id)
+
+
+    if spellID then
+        GameTooltip:Hide()
+        Browser.TargetList[spellID]  = true
+        viewer:SetText(TEMPLATE_AURA{ target = Browser.TargetList })
+    end
+end
+
+-----------------------------------------------------------
+-- Export/Import UI
+-----------------------------------------------------------
+ExportGuide                     = Dialog("AshToAsh_Export_Guide")
+ExportGuide:Hide()
+
+chkAuraBlackList                = UICheckButton("AuraBlackList", ExportGuide)
+chkClassBuffList                = UICheckButton("ClassBuffList", ExportGuide)
+chkCurrentSpec                  = UIRadioButton("CurrentSpec",   ExportGuide)
+chkAllSpec                      = UIRadioButton("AllSpec",       ExportGuide)
+confirmButton                   = UIPanelButton("Confirm",       ExportGuide)
+result                          = InputScrollFrame("Result",     ExportGuide)
+
+Style[ExportGuide]              = {
+    Header                      = { Text = "AshToAsh" },
+    Size                        = Size(400, 400),
+    clampedToScreen             = true,
+    minResize                   = Size(200, 200),
+
+    AuraBlackList               = {
+        location                = { Anchor("TOPLEFT", 24, -32) },
+        label                   = { text = _Locale["Aura Black List"] },
+    },
+    ClassBuffList               = {
+        location                = { Anchor("TOP", 0, -16, "AuraBlackList", "BOTTOM") },
+        label                   = { text = _Locale["Class Buff List"] },
+    },
+    CurrentSpec                 = {
+        location                = { Anchor("TOP", 0, -16, "ClassBuffList", "BOTTOM") },
+        label                   = { text = _Locale["Current Specialization"] },
+    },
+    AllSpec                     = {
+        location                = { Anchor("TOP", 0, -16, "CurrentSpec", "BOTTOM") },
+        label                   = { text = _Locale["All Specialization"] },
+    },
+
+    Result                      = {
+        maxLetters              = 0,
+        location                = { Anchor("TOPLEFT", 24, -32), Anchor("BOTTOMRIGHT", -24, 60) },
+    },
+
+    Confirm                     = {
+        location                = { Anchor("BOTTOMLEFT", 24, 16 ) },
+        text                    = _Locale["Next"],
+    },
+}
+
+function confirmButton:OnClick()
+    if ExportGuide.ExportMode then
+        Style[confirmButton].text   = _Locale["Close"]
+
+        if chkAuraBlackList:IsShown() then
+            local settings      = {}
+            if chkAuraBlackList:GetChecked() then
+                settings.AuraBlackList  = XDictionary(_AuraBlackList).Keys:ToList():Sort()
+            end
+            if chkClassBuffList:GetChecked() then
+                settings.ClassBuffList  = XDictionary(_ClassBuffList).Keys:ToList():Sort()
+            end
+            if chkCurrentSpec:GetChecked() then
+                settings.CurrentSpec    = {
+                    AuraPriority        = _SVDB.Char.Spec.AuraPriority,
+                    Panels              = _SVDB.Char.Spec.Panels,
+                }
+            elseif chkAllSpec:GetChecked() then
+                settings.AllSpec        = {}
+                for i = 1, 3 do
+                    local spec          = _SVDB.Char.Specs[i]
+                    if spec then
+                        settings.AllSpec[i] = {
+                            AuraPriority= spec.AuraPriority,
+                            Panels      = spec.Panels,
+                        }
+                    end
+                end
+            end
+
+            chkAuraBlackList:Hide()
+            chkClassBuffList:Hide()
+            chkCurrentSpec:Hide()
+            chkAllSpec:Hide()
+            confirmButton:Show()
+
+            result:SetText(Text.Base64Encode(Toolset.tostring(settings)))
+            result:Show()
+        else
+            ExportGuide:Hide()
+        end
+    else
+        chkAuraBlackList:Show()
+        chkClassBuffList:Show()
+        chkCurrentSpec:Show()
+        chkAllSpec:Show()
+        confirmButton:Show()
+        result:Hide()
+    end
+end
+
 
 -----------------------------------------------------------
 -- Helpers
@@ -455,7 +636,6 @@ function AddPanel(self, type)
             Style                   = {
                 location            = { Anchor("TOPLEFT", 0, 0, self:GetName(), "TOPRIGHT") },
 
-                activated           = true,
                 activatedInCombat   = false,
 
                 columnCount         = 1,
@@ -539,6 +719,48 @@ function DeletePanel(self)
     UnlockPanels()
 end
 
+function OpenAuraBlackList()
+    Style[Browser].Header.text = _Locale["Aura Black List"]
+    Browser.TargetList          = _AuraBlackList
+    viewer:SetText(TEMPLATE_AURA{ target = _AuraBlackList })
+    Browser:Show()
+end
+
+function OpenClassBuffList()
+    Style[Browser].Header.text  = _Locale["Class Buff List"]
+    Browser.TargetList          = _ClassBuffList
+    viewer:SetText(TEMPLATE_AURA{ target = _ClassBuffList })
+    Browser:Show()
+end
+
+function ExportSettings()
+    Style[ExportGuide].Header.text = _Locale["Export"]
+    chkAuraBlackList:Show()
+    chkClassBuffList:Show()
+    chkCurrentSpec:Show()
+    chkAllSpec:Show()
+    confirmButton:Show()
+    result:Hide()
+
+    ExportGuide:Show()
+    ExportGuide.ExportMode      = true
+    Style[confirmButton].text   = _Locale["Next"]
+end
+
+function ImportSettings()
+    Style[ExportGuide].Header.text = _Locale["Import"]
+    chkAuraBlackList:Hide()
+    chkClassBuffList:Hide()
+    chkCurrentSpec:Hide()
+    chkAllSpec:Hide()
+    confirmButton:Show()
+    result:Show()
+
+    ExportGuide:Show()
+    ExportGuide.ExportMode      = false
+    Style[confirmButton].text   = _Locale["Next"]
+end
+
 function OpenMenu(self)
     local panel                 = _SVDB.Char.Spec.Panels[self.Index]
     if not panel then return end
@@ -574,13 +796,30 @@ function OpenMenu(self)
             },
         },
         {
-            text                = _Locale["Delete Panel"],
-            click               = function()
-                if Confirm(_Locale["Do you really want delete the panel?"]) then
-                    DeletePanel(self, panel)
-                end
-            end,
-            disabled            = self.Index == 1,
+            text                = _Locale["Aura Filter"],
+            submenu             = {
+                {
+                    text        = _Locale["Aura Black List"],
+                    click       = OpenAuraBlackList,
+                },
+                {
+                    text        = _Locale["Class Buff List"],
+                    click       = OpenClassBuffList,
+                },
+            }
+        },
+        {
+            text                = _Locale["Import/Export"],
+            submenu             = {
+                {
+                    text        = _Locale["Export"],
+                    click       = ExportSettings,
+                },
+                {
+                    text        = _Locale["Import"],
+                    click       = ImportSettings,
+                },
+            },
         },
         {
             separator           = true,
@@ -868,5 +1107,13 @@ function OpenMenu(self)
                 },
             },
         },
+        self.Index > 1 and {
+            text                = _Locale["Delete Panel"],
+            click               = function()
+                if Confirm(_Locale["Do you really want delete the panel?"]) then
+                    DeletePanel(self, panel)
+                end
+            end,
+        } or nil,
     }
 end

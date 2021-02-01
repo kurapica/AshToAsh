@@ -25,12 +25,13 @@ __Sealed__() class "AshUnitWatchPanel" (function(_ENV)
     local _TankList             = {}
 
     local function refreshElements(self, list)
-        self.Count              = #list
+        self.Count              = list and #list or 0
 
         local onlyCombat        = self.ActivatedInCombat
         local onlyEnemy         = self.ShowEnemyOnly
 
-        for i, unit in ipairs(list) do
+        for i = 1, self.Count do
+            local unit          = list[i]
             local unitframe     = self.Elements[i]
             if unitframe.StateRegistered then
                 unitframe:UnregisterStateDriver("visibility")
@@ -68,10 +69,12 @@ __Sealed__() class "AshUnitWatchPanel" (function(_ENV)
         local list              = self.UnitWatchList
         local scanRole          = false
 
-        for i, unit in ipairs(list) do
-            if unit:match("maintank") or unit:match("mainassist") or unit:match("tank") then
-                scanRole        = true
-                break
+        if list then
+            for i, unit in ipairs(list) do
+                if unit:match("maintank") or unit:match("mainassist") or unit:match("tank") then
+                    scanRole    = true
+                    break
+                end
             end
         end
 
