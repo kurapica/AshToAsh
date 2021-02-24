@@ -10,7 +10,7 @@
 ## SavedVariablesPerCharacter: AshToAsh_CharDB
 
 # Localization
-# localization\zhCN.lua
+localization\zhCN.lua
 
 # Core
 AshToAsh.lua

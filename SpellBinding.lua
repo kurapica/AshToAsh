@@ -39,6 +39,7 @@ end
 -----------------------------------------------------------
 __SlashCmd__ "/ata" "bind"
 __SlashCmd__ "/ashtoash" "bind"
+__SystemEvent__ "ASH_TO_ASH_SPELL_BINDING"
 function StartSpellBinding()
     if InCombatLockdown() then return end
     IN_SPELL_BIND_MODE          = true

@@ -11,6 +11,8 @@ Scorpio           "AshToAsh"                         "1.0.0"
 
 namespace "AshToAsh"
 
+export { tremove = table.remove, tinsert = table.insert }
+
 import "Scorpio.Secure"
 import "System.Reactive"
 import "System.Text"
@@ -147,7 +149,7 @@ function OnSpecChanged()
                                 or SecureGroupPanel)("AshToAsh" .. panel.Type .. index)
 
             upanel.ElementType  = panel.Type == PanelType.Pet and AshPetUnitFrame or AshUnitFrame
-            upanel.ElementPrefix= "AshUnitFrame" .. panel.Type
+            upanel.ElementPrefix= "AshToAsh" .. panel.Type .. index .. "Unit"
 
             panelCache[index]   = upanel
         end
@@ -176,7 +178,8 @@ function OnSpecChanged()
         end
     end
 
-    SUBJECT_BUFF_PRIORITY:OnNext(_SVDB.Char.Spec.AuraPriority)
+    _AuraPriority               = _SVDB.Char.Spec.AuraPriority
+    SUBJECT_BUFF_PRIORITY:OnNext(Toolset.clone(_AuraPriority))
 end
 
 -----------------------------------------------------------
@@ -260,6 +263,19 @@ TEMPLATE_AURA                   = TemplateString[[
     </html>
 ]]
 
+TEMPLATE_PRIORITY               = TemplateString[[
+    <html>
+        <body>
+            @for _, id in ipairs(target) do
+            @if tonumber(id) then
+            <p><a href="@id">[@GetSpellInfo(id)]</a></p>
+            @else
+            <p><a href="@id">[@id]</a></p>
+            @end end
+        </body>
+    </html>
+]]
+
 Style[Browser]                  = {
     Header                      = { Text = "AshToAsh" },
     Size                        = Size(300, 400),
@@ -284,9 +300,20 @@ Style[Browser]                  = {
 
 function viewer:OnHyperlinkClick(id)
     id                          = tonumber(id) or id
-    Browser.TargetList[id]      = nil
+    if Browser.TargetList == _AuraPriority then
+        for i, v in ipairs(_AuraPriority) do
+            if v == id then
+                tremove(_AuraPriority, i)
+                break
+            end
+        end
 
-    viewer:SetText(TEMPLATE_AURA{ target = Browser.TargetList })
+        viewer:SetText(TEMPLATE_PRIORITY{ target = Browser.TargetList })
+    else
+        Browser.TargetList[id]  = nil
+
+        viewer:SetText(TEMPLATE_AURA{ target = Browser.TargetList })
+    end
 end
 
 function viewer:OnHyperlinkEnter(id)
@@ -310,11 +337,25 @@ function addButton:OnClick()
     id                          = id and tonumber(id) or id
     local _,_,_,_,_,_,spellID   = GetSpellInfo(id)
 
-
     if spellID then
         GameTooltip:Hide()
-        Browser.TargetList[spellID]  = true
-        viewer:SetText(TEMPLATE_AURA{ target = Browser.TargetList })
+
+        if Browser.TargetList == _AuraPriority then
+            for i, v in ipairs(_AuraPriority) do
+                if v == spellID then return end
+            end
+            tinsert(_AuraPriority, spellID)
+            viewer:SetText(TEMPLATE_PRIORITY{ target = Browser.TargetList })
+        else
+            Browser.TargetList[spellID]  = true
+            viewer:SetText(TEMPLATE_AURA{ target = Browser.TargetList })
+        end
+    end
+end
+
+function Browser:OnHide()
+    if Browser.TargetList == _AuraPriority then
+        SUBJECT_BUFF_PRIORITY:OnNext(Toolset.clone(_AuraPriority))
     end
 end
 
@@ -367,10 +408,10 @@ Style[ExportGuide]              = {
 
 function confirmButton:OnClick()
     if ExportGuide.ExportMode then
-        Style[confirmButton].text   = _Locale["Close"]
+        Style[confirmButton].text       = _Locale["Close"]
 
         if chkAuraBlackList:IsShown() then
-            local settings      = {}
+            local settings              = {}
             if chkAuraBlackList:GetChecked() then
                 settings.AuraBlackList  = XDictionary(_AuraBlackList).Keys:ToList():Sort()
             end
@@ -401,18 +442,86 @@ function confirmButton:OnClick()
             chkAllSpec:Hide()
             confirmButton:Show()
 
-            result:SetText(Text.Base64Encode(Toolset.tostring(settings)))
+            result:SetText(Base64.Encode(Deflate.Encode(Toolset.tostring(settings))))
             result:Show()
         else
             ExportGuide:Hide()
         end
     else
-        chkAuraBlackList:Show()
-        chkClassBuffList:Show()
-        chkCurrentSpec:Show()
-        chkAllSpec:Show()
-        confirmButton:Show()
-        result:Hide()
+        if chkAuraBlackList:IsShown() then
+            local settings              = ExportGuide.TempSettings
+            if chkAuraBlackList:GetChecked() and settings.AuraBlackList then
+                for k in pairs(settings.AuraBlackList) do
+                    _AuraBlackList[k]   = true
+                end
+            end
+
+            if chkClassBuffList:GetChecked() and settings.ClassBuffList then
+                for k in pairs(settings.ClassBuffList) do
+                    _ClassBuffList[k]   = true
+                end
+            end
+
+            if chkCurrentSpec:GetChecked() and settings.CurrentSpec then
+                _SVDB.Char.Spec.AuraPriority = settings.CurrentSpec.AuraPriority
+                _SVDB.Char.Spec.Panels  = settings.CurrentSpec.Panels
+            elseif chkAllSpec:GetChecked() and settings.AllSpec then
+                for i, v in pairs(settings.AllSpec) do
+                    local spec          = _SVDB.Char.Specs[i]
+                    spec.AuraPriority   = v.AuraPriority
+                    spec.Panels         = v.Panels
+
+                end
+            end
+
+            ExportGuide.TempSettings    = nil
+            ExportGuide:Hide()
+
+            LockPanels()
+            OnSpecChanged()
+            UnlockPanels()
+        else
+            local ok, settings          = pcall(loadImportSettings)
+            if ok and type(settings) == "table" then
+                chkAuraBlackList:Show()
+                chkClassBuffList:Show()
+                chkCurrentSpec:Show()
+                chkAllSpec:Show()
+                confirmButton:Show()
+                result:Hide()
+
+                if settings.AuraBlackList then
+                    chkAuraBlackList:Enable()
+                    chkAuraBlackList:SetChecked(true)
+                else
+                    chkAuraBlackList:Disable()
+                    chkAuraBlackList:SetChecked(false)
+                end
+
+                if settings.ClassBuffList then
+                    chkClassBuffList:Enable()
+                    chkClassBuffList:SetChecked(true)
+                else
+                    chkClassBuffList:Disable()
+                    chkClassBuffList:SetChecked(false)
+                end
+
+                if settings.CurrentSpec then
+                    chkCurrentSpec:Enable()
+                    chkAllSpec:Disable()
+                    chkCurrentSpec:SetChecked(true)
+                    chkAllSpec:SetChecked(false)
+                elseif settings.AllSpec then
+                    chkCurrentSpec:Disable()
+                    chkAllSpec:Enable()
+                    chkCurrentSpec:SetChecked(false)
+                    chkAllSpec:SetChecked(true)
+                end
+
+                ExportGuide.TempSettings = settings
+            end
+        end
+
     end
 end
 
@@ -483,7 +592,7 @@ function GetClassFilter(self, panel)
                     if value then return end
 
                     table.remove(panel.Style.classFilter, i)
-                    Style[self].classFilter = panel.Style.classFilter
+                    Style[self].classFilter = Toolset.clone(panel.Style.classFilter)
                 end,
             }
         }
@@ -499,7 +608,7 @@ function GetClassFilter(self, panel)
                         if not value then return end
 
                         table.insert(panel.Style.classFilter, v)
-                        Style[self].classFilter = panel.Style.classFilter
+                        Style[self].classFilter = Toolset.clone(panel.Style.classFilter)
                     end,
                 }
             })
@@ -524,7 +633,7 @@ function GetRoleFilter(self, panel)
                     if value then return end
 
                     table.remove(panel.Style.roleFilter, i)
-                    Style[self].roleFilter = panel.Style.roleFilter
+                    Style[self].roleFilter = Toolset.clone(panel.Style.roleFilter)
                 end,
             }
         }
@@ -540,7 +649,7 @@ function GetRoleFilter(self, panel)
                         if not value then return end
 
                         table.insert(panel.Style.roleFilter, v)
-                        Style[self].roleFilter = panel.Style.roleFilter
+                        Style[self].roleFilter = Toolset.clone(panel.Style.roleFilter)
                     end,
                 }
             })
@@ -565,7 +674,7 @@ function GetGroupFilter(self, panel)
                     if value then return end
 
                     table.remove(panel.Style.groupFilter, i)
-                    Style[self].groupFilter = panel.Style.groupFilter
+                    Style[self].groupFilter = Toolset.clone(panel.Style.groupFilter)
                 end,
             }
         }
@@ -581,7 +690,7 @@ function GetGroupFilter(self, panel)
                         if not value then return end
 
                         table.insert(panel.Style.groupFilter, v)
-                        Style[self].groupFilter = panel.Style.groupFilter
+                        Style[self].groupFilter = Toolset.clone(panel.Style.groupFilter)
                     end,
                 }
             })
@@ -634,7 +743,7 @@ function AddPanel(self, type)
         table.insert(_SVDB.Char.Spec.Panels, {
             Type                    = type,
             Style                   = {
-                location            = { Anchor("TOPLEFT", 0, 0, self:GetName(), "TOPRIGHT") },
+                location            = { Anchor("TOPLEFT", 4, 0, self:GetName(), "TOPRIGHT") },
 
                 activatedInCombat   = false,
 
@@ -656,7 +765,7 @@ function AddPanel(self, type)
         table.insert(_SVDB.Char.Spec.Panels, {
             Type                    = type,
             Style                   = {
-                location            = { Anchor("TOPLEFT", 0, 0, self:GetName(), "TOPRIGHT") },
+                location            = { Anchor("TOPLEFT", 4, 0, self:GetName(), "TOPRIGHT") },
 
                 activated           = true,
                 activatedInCombat   = false,
@@ -733,6 +842,13 @@ function OpenClassBuffList()
     Browser:Show()
 end
 
+function OpenAuraPriorityList()
+    Style[Browser].Header.text  = _Locale["Aura Priority List"]
+    Browser.TargetList          = _AuraPriority
+    viewer:SetText(TEMPLATE_PRIORITY{ target = _AuraPriority })
+    Browser:Show()
+end
+
 function ExportSettings()
     Style[ExportGuide].Header.text = _Locale["Export"]
     chkAuraBlackList:Show()
@@ -741,6 +857,17 @@ function ExportSettings()
     chkAllSpec:Show()
     confirmButton:Show()
     result:Hide()
+
+    chkAuraBlackList:Enable()
+    chkClassBuffList:Enable()
+    chkCurrentSpec:Enable()
+    chkAllSpec:Enable()
+    confirmButton:Enable()
+
+    chkAuraBlackList:SetChecked(true)
+    chkClassBuffList:SetChecked(true)
+    chkCurrentSpec:SetChecked(true)
+    chkAllSpec:SetChecked(false)
 
     ExportGuide:Show()
     ExportGuide.ExportMode      = true
@@ -759,6 +886,10 @@ function ImportSettings()
     ExportGuide:Show()
     ExportGuide.ExportMode      = false
     Style[confirmButton].text   = _Locale["Next"]
+end
+
+function loadImportSettings()
+    return Toolset.parsestring(Deflate.Decode(Base64.Decode(result:GetText())))
 end
 
 function OpenMenu(self)
@@ -806,6 +937,10 @@ function OpenMenu(self)
                     text        = _Locale["Class Buff List"],
                     click       = OpenClassBuffList,
                 },
+                {
+                    text        = _Locale["Aura Priority List"],
+                    click       = OpenAuraPriorityList,
+                },
             }
         },
         {
@@ -820,6 +955,10 @@ function OpenMenu(self)
                     click       = ImportSettings,
                 },
             },
+        },
+        {
+            text                = _Locale["Spell Binding"],
+            click               = function() FireSystemEvent("ASH_TO_ASH_SPELL_BINDING") end,
         },
         {
             separator           = true,
@@ -1107,13 +1246,18 @@ function OpenMenu(self)
                 },
             },
         },
-        self.Index > 1 and {
+        {
             text                = _Locale["Delete Panel"],
+            disabled            = self.Index == 1,
             click               = function()
                 if Confirm(_Locale["Do you really want delete the panel?"]) then
                     DeletePanel(self, panel)
                 end
             end,
-        } or nil,
+        },
+        {
+            text                = _Locale["Lock Panels"],
+            click               = LockPanels,
+        },
     }
 end

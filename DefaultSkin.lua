@@ -110,6 +110,7 @@ Style.UpdateSkin("Default",     {
     -- Indicators for Unit Frames
     [AshUnitFrame]              = {
         hoverSpellGroup         = HOVER_SPELL_GROUP,
+        alpha                   = Wow.UnitInRange():Map('v=>v and 1 or 0.5'),
 
         -- Main Indicators
         SHARE_NAMELABEL_SKIN,
@@ -161,14 +162,14 @@ Style.UpdateSkin("Default",     {
             elementType         = AshAuraPanelIcon,
             rowCount            = 2,
             columnCount         = 3,
-            elementWidth        = 16,
-            elementHeight       = 16,
+            elementWidth        = 12,
+            elementHeight       = 12,
             hSpacing            = 1,
             vSpacing            = 1,
             orientation         = Orientation.HORIZONTAL,
             topToBottom         = true,
             leftToRight         = true,
-            location            = { Anchor("TOPLEFT") },
+            location            = { Anchor("TOPLEFT", 1, -1) },
 
             auraPriority        = SUBJECT_BUFF_PRIORITY,
             auraFilter          = "HELPFUL|PLAYER",
@@ -179,8 +180,8 @@ Style.UpdateSkin("Default",     {
             elementType         = AshAuraPanelIcon,
             rowCount            = 2,
             columnCount         = 3,
-            elementWidth        = 16,
-            elementHeight       = 16,
+            elementWidth        = 12,
+            elementHeight       = 12,
             hSpacing            = 1,
             vSpacing            = 1,
             orientation         = Orientation.VERTICAL,
@@ -195,8 +196,8 @@ Style.UpdateSkin("Default",     {
             elementType         = AshClassPanelIcon,
             rowCount            = 2,
             columnCount         = 1,
-            elementWidth        = 18,
-            elementHeight       = 18,
+            elementWidth        = 16,
+            elementHeight       = 16,
             hSpacing            = 1,
             vSpacing            = 1,
             orientation         = Orientation.HORIZONTAL,
