@@ -106,7 +106,7 @@ __Sealed__() class "AshUnitWatchPanel" (function(_ENV)
                     end
                 end
 
-                for i, unit in ipairs(d) do
+                for i, unit in ipairs(list) do
                     if unit:match("maintank") then
                         if maintank then
                             unit = unit:gsub("maintank", maintank)
