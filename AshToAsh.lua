@@ -714,7 +714,7 @@ function GetWatchUnits(self, panel)
                     end
 
                     table.insert(panel.Style.unitWatchList, new)
-                    Style[self].unitWatchList = panel.Style.unitWatchList
+                    Style[self].unitWatchList = Toolset.clone(panel.Style.unitWatchList)
                 end
             end,
         },
@@ -729,7 +729,7 @@ function GetWatchUnits(self, panel)
             click               = function()
                 if Confirm(_Locale["Do you want delete the watch unit"]) then
                     table.remove(panel.Style.unitWatchList, i)
-                    Style[self].unitWatchList = panel.Style.unitWatchList
+                    Style[self].unitWatchList = Toolset.clone(panel.Style.unitWatchList)
                 end
             end,
         })
