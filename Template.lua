@@ -27,7 +27,6 @@ __Sealed__() class "AshUnitWatchPanel" (function(_ENV)
     local function refreshElements(self, list)
         self.Count              = list and #list or 0
 
-        local onlyCombat        = self.ActivatedInCombat
         local onlyEnemy         = self.ShowEnemyOnly
 
         for i = 1, self.Count do
@@ -39,22 +38,12 @@ __Sealed__() class "AshUnitWatchPanel" (function(_ENV)
             end
             unitframe.Unit      = unit
 
-            if onlyCombat then
-                unitframe.UnitWatchEnabled      = false
-                unitframe.StateRegistered       = true
-                if onlyEnemy then
-                    unitframe:RegisterStateDriver("visibility", ("[@%s,harm,combat]show;hide"):format(unit))
-                else
-                    unitframe:RegisterStateDriver("visibility", ("[@%s,combat]show;hide"):format(unit))
-                end
+            if onlyEnemy and not unit:match("nameplate") then
+                unitframe.UnitWatchEnabled  = false
+                unitframe.StateRegistered   = true
+                unitframe:RegisterStateDriver("visibility", ("[@%s,harm]show;hide"):format(unit))
             else
-                if onlyEnemy and not unit:match("nameplate") then
-                    unitframe.UnitWatchEnabled  = false
-                    unitframe.StateRegistered   = true
-                    unitframe:RegisterStateDriver("visibility", ("[@%s,harm]show;hide"):format(unit))
-                else
-                    unitframe.UnitWatchEnabled  = true
-                end
+                unitframe.UnitWatchEnabled  = true
             end
         end
     end
@@ -170,9 +159,6 @@ __Sealed__() class "AshUnitWatchPanel" (function(_ENV)
 
     -- Whether only show enemy units
     property "ShowEnemyOnly"    { handler = Refresh, type = Boolean }
-
-    -- Whether the panel is only activated during combat
-    property "ActivatedInCombat"{ handler = Refresh, type = Boolean, default = false }
 end)
 
 -- Aura Panel Icon

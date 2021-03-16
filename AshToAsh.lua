@@ -6,7 +6,7 @@
 --========================================================--
 
 --========================================================--
-Scorpio           "AshToAsh"                         "1.0.0"
+Scorpio           "AshToAsh"                         "1.1.0"
 --========================================================--
 
 namespace "AshToAsh"
@@ -104,8 +104,7 @@ function OnLoad()
                 Style           = {
                     location            = { Anchor("CENTER", 30, 0) },
 
-                    activated           = true,
-                    activatedInCombat   = false,
+                    autoHide            = {},
 
                     columnCount         = 4,
                     rowCount            = 5,
@@ -154,6 +153,10 @@ function OnSpecChanged()
             panelCache[index]   = upanel
         end
 
+        -- @todo: Should be removed in the several next versions
+        panel.Style.activated   = nil
+        panel.Style.activatedInCombat = nil
+
         Style[upanel]           = panel.Style
         upanel:Show()
         upanel:InstantApplyStyle()
@@ -170,8 +173,7 @@ function OnSpecChanged()
 
     for t, cache in pairs(UNIT_PANELS) do
         for i = #cache, (idxMap[t] or 0) + 1, -1 do
-            cache[i].Activated  = false
-            cache[i].ActivatedInCombat = false
+            cache[i]:SetAutoHide(nil)
             cache[i].Count      = 0
             cache[i]:Hide()
             cache[i].Index      = -1
@@ -736,6 +738,42 @@ function GetWatchUnits(self, panel)
     return config
 end
 
+function GetAutoHideMenu(self, panel)
+    local config                = {
+        {
+            text                = _Locale["Add Macro Condition"],
+            click               = function()
+                local new       = PickMacroCondition(_Locale["Please select the macro condition"])
+                if new then
+                    for _, macro in ipairs(panel.Style.autoHide) do
+                        if macro == new then return end
+                    end
+
+                    table.insert(panel.Style.autoHide, new)
+                    Style[self].autoHide = Toolset.clone(panel.Style.autoHide)
+                end
+            end,
+        },
+        {
+            separator           = true,
+        },
+    }
+
+    for i, macro in ipairs(panel.Style.autoHide) do
+        table.insert(config,    {
+            text                = macro,
+            click               = function()
+                if Confirm(_Locale["Do you want delete the macro condition"]) then
+                    table.remove(panel.Style.autoHide, i)
+                    Style[self].autoHide = Toolset.clone(panel.Style.autoHide)
+                end
+            end,
+        })
+    end
+
+    return config
+end
+
 function AddPanel(self, type)
     NoCombat()
 
@@ -745,7 +783,7 @@ function AddPanel(self, type)
             Style                   = {
                 location            = { Anchor("TOPLEFT", 4, 0, self:GetName(), "TOPRIGHT") },
 
-                activatedInCombat   = false,
+                autoHide            = {},
 
                 columnCount         = 1,
                 rowCount            = 5,
@@ -767,8 +805,7 @@ function AddPanel(self, type)
             Style                   = {
                 location            = { Anchor("TOPLEFT", 4, 0, self:GetName(), "TOPRIGHT") },
 
-                activated           = true,
-                activatedInCombat   = false,
+                autoHide            = {},
 
                 columnCount         = 1,
                 rowCount            = 5,
@@ -1080,16 +1117,6 @@ function OpenMenu(self)
             text                = _Locale["Visiblity"],
             submenu             = panel.Type == PanelType.UnitWatch and {
                 {
-                    text        = _Locale["Activated In Combat"],
-                    check       = {
-                        get     = function() return panel.Style.activatedInCombat end,
-                        set     = function(value)
-                            panel.Style.activatedInCombat = value
-                            Style[self].activatedInCombat = value
-                        end,
-                    }
-                },
-                {
                     text        = _Locale["Show Enemy Only"],
                     check       = {
                         get     = function() return panel.Style.showEnemyOnly end,
@@ -1101,26 +1128,6 @@ function OpenMenu(self)
                 }
             } or
             {
-                {
-                    text        = _Locale["Activated"],
-                    check       = {
-                        get     = function() return panel.Style.activated end,
-                        set     = function(value)
-                            panel.Style.activated = value
-                            Style[self].activated = value
-                        end,
-                    }
-                },
-                {
-                    text        = _Locale["Activated In Combat"],
-                    check       = {
-                        get     = function() return panel.Style.activatedInCombat end,
-                        set     = function(value)
-                            panel.Style.activatedInCombat = value
-                            Style[self].activatedInCombat = value
-                        end,
-                    }
-                },
                 {
                     text        = _Locale["Show In Raid"],
                     check       = {
@@ -1172,6 +1179,10 @@ function OpenMenu(self)
                     }
                 } or nil,
             },
+        },
+        {
+            text                = _Locale["Auto Hide"],
+            submenu             = GetAutoHideMenu(self, panel),
         },
         panel.Type == PanelType.UnitWatch and {
             text                = _Locale["Watch Units"],
