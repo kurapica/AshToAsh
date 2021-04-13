@@ -109,7 +109,6 @@ Style.UpdateSkin("Default",     {
 
     -- Indicators for Unit Frames
     [AshUnitFrame]              = {
-        hoverSpellGroup         = HOVER_SPELL_GROUP,
         alpha                   = Wow.UnitInRange():Map('v=>v and 1 or 0.5'),
 
         -- Main Indicators
@@ -212,8 +211,6 @@ Style.UpdateSkin("Default",     {
 
     -- Indicators for Unit Pet Frames
     [AshPetUnitFrame]           = {
-        hoverSpellGroup         = HOVER_SPELL_GROUP,
-
         -- Indicators
         SHARE_NAMELABEL_SKIN,
 

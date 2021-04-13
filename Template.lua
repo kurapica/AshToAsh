@@ -10,10 +10,10 @@ Scorpio           "AshToAsh.Template"                "1.0.0"
 --========================================================--
 
 --- The unit frame template class to be used in the raid panel
-__Sealed__() class "AshUnitFrame"     { Scorpio.Secure.UnitFrame }
+__Sealed__() class "AshUnitFrame"     { Scorpio.Secure.UnitFrame, HoverSpellGroup = { default = HOVER_SPELL_GROUP } }
 
 --- The pet unit frame
-__Sealed__() class "AshPetUnitFrame"  { Scorpio.Secure.UnitFrame }
+__Sealed__() class "AshPetUnitFrame"  { Scorpio.Secure.UnitFrame, HoverSpellGroup = { default = HOVER_SPELL_GROUP } }
 
 --- The unit watch panel
 __Sealed__() class "AshUnitWatchPanel" (function(_ENV)
