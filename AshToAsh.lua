@@ -29,7 +29,7 @@ RECYCLE_MASKS                   = Recycle(Scorpio.Widget.Mask, "AshToAsh_Mask%d"
 
 UNLOCK_PANELS                   = false
 
-DEFAULT_CLASS_SORT_ORDER        = { "WARRIOR", "DEATHKNIGHT", "PALADIN", "MONK", "PRIEST", "SHAMAN", "DRUID", "ROGUE", "MAGE", "WARLOCK", "HUNTER", "DEMONHUNTER" }
+DEFAULT_CLASS_SORT_ORDER        = Scorpio.IsRetail and { "WARRIOR", "DEATHKNIGHT", "PALADIN", "MONK", "PRIEST", "SHAMAN", "DRUID", "ROGUE", "MAGE", "WARLOCK", "HUNTER", "DEMONHUNTER" } or { "WARRIOR", "PALADIN", "PRIEST", "SHAMAN", "DRUID", "ROGUE", "MAGE", "WARLOCK", "HUNTER" }
 DEFAULT_ROLE_SORT_ORDER         = { "MAINTANK", "MAINASSIST", "TANK", "HEALER", "DAMAGER", "NONE"}
 DEFAULT_GROUP_SORT_ORDER        = { 1, 2, 3, 4, 5, 6, 7, 8 }
 
@@ -50,7 +50,7 @@ function OnLoad()
     _AuraBlackList              = _SVDB.AuraBlackList
     _ClassBuffList              = _SVDB.ClassBuffList
 
-    if not next(_ClassBuffList) then
+    if Scorpio.IsRetail and not next(_ClassBuffList) then
         -- Paladin
         _ClassBuffList[132403]  = true  -- Shield of the Righteous
         _ClassBuffList[31850]   = true  -- Ardent Defender
@@ -96,7 +96,7 @@ function OnLoad()
     end
 
     -- Spec Settings
-    _SVDB.Char.Spec:SetDefault{
+    CharSV():SetDefault{
         AuraPriority            = {},
         Panels                  = {
             [1]                 = {
@@ -137,7 +137,7 @@ function OnSpecChanged()
     local idxMap                = {}
     CURRENT_UNIT_PANELS:Clear()
 
-    for i, panel in ipairs(_SVDB.Char.Spec.Panels) do
+    for i, panel in ipairs(CharSV().Panels) do
         local index             = (idxMap[panel.Type] or 0) + 1
         local panelCache        = UNIT_PANELS[panel.Type]
         local upanel            = panelCache[index]
@@ -180,7 +180,7 @@ function OnSpecChanged()
         end
     end
 
-    _AuraPriority               = _SVDB.Char.Spec.AuraPriority
+    _AuraPriority               = CharSV().AuraPriority
     SUBJECT_BUFF_PRIORITY:OnNext(Toolset.clone(_AuraPriority))
 end
 
@@ -390,11 +390,12 @@ Style[ExportGuide]              = {
     },
     CurrentSpec                 = {
         location                = { Anchor("TOP", 0, -16, "ClassBuffList", "BOTTOM") },
-        label                   = { text = _Locale["Current Specialization"] },
+        label                   = { text = _Locale[Scorpio.IsRetail and "Current Specialization" or "Current Settings"] },
     },
     AllSpec                     = {
         location                = { Anchor("TOP", 0, -16, "CurrentSpec", "BOTTOM") },
         label                   = { text = _Locale["All Specialization"] },
+        visible                 = Scorpio.IsRetail,
     },
 
     Result                      = {
@@ -422,10 +423,10 @@ function confirmButton:OnClick()
             end
             if chkCurrentSpec:GetChecked() then
                 settings.CurrentSpec    = {
-                    AuraPriority        = _SVDB.Char.Spec.AuraPriority,
-                    Panels              = _SVDB.Char.Spec.Panels,
+                    AuraPriority        = CharSV().AuraPriority,
+                    Panels              = CharSV().Panels,
                 }
-            elseif chkAllSpec:GetChecked() then
+            elseif Scorpio.IsRetail and chkAllSpec:GetChecked() then
                 settings.AllSpec        = {}
                 for i = 1, 3 do
                     local spec          = _SVDB.Char.Specs[i]
@@ -465,9 +466,9 @@ function confirmButton:OnClick()
             end
 
             if chkCurrentSpec:GetChecked() and settings.CurrentSpec then
-                _SVDB.Char.Spec.AuraPriority = settings.CurrentSpec.AuraPriority
-                _SVDB.Char.Spec.Panels  = settings.CurrentSpec.Panels
-            elseif chkAllSpec:GetChecked() and settings.AllSpec then
+                CharSV().AuraPriority   = settings.CurrentSpec.AuraPriority
+                CharSV().Panels         = settings.CurrentSpec.Panels
+            elseif Scorpio.IsRetail and chkAllSpec:GetChecked() and settings.AllSpec then
                 for i, v in pairs(settings.AllSpec) do
                     local spec          = _SVDB.Char.Specs[i]
                     spec.AuraPriority   = v.AuraPriority
@@ -488,7 +489,7 @@ function confirmButton:OnClick()
                 chkAuraBlackList:Show()
                 chkClassBuffList:Show()
                 chkCurrentSpec:Show()
-                chkAllSpec:Show()
+                chkAllSpec:SetShown(Scorpio.IsRetail)
                 confirmButton:Show()
                 result:Hide()
 
@@ -568,14 +569,14 @@ function ReLocation(self)
         end
 
         if location then
-            _SVDB.Char.Spec.Panels[self.Index].Style.location = location
+            CharSV().Panels[self.Index].Style.location = location
             Style[self].location= location
             return
         end
     end
 
     local location              = self:GetLocation({ Anchor("TOPLEFT", 0, 0, nil, "CENTER") })
-    _SVDB.Char.Spec.Panels[self.Index].Style.location = location
+    CharSV().Panels[self.Index].Style.location = location
     Style[self].location= location
 end
 
@@ -778,7 +779,7 @@ function AddPanel(self, type)
     NoCombat()
 
     if type == PanelType.UnitWatch then
-        table.insert(_SVDB.Char.Spec.Panels, {
+        table.insert(CharSV().Panels, {
             Type                    = type,
             Style                   = {
                 location            = { Anchor("TOPLEFT", 4, 0, self:GetName(), "TOPRIGHT") },
@@ -800,7 +801,7 @@ function AddPanel(self, type)
             }
         })
     else
-        table.insert(_SVDB.Char.Spec.Panels, {
+        table.insert(CharSV().Panels, {
             Type                    = type,
             Style                   = {
                 location            = { Anchor("TOPLEFT", 4, 0, self:GetName(), "TOPRIGHT") },
@@ -858,7 +859,7 @@ function DeletePanel(self)
         end
     end
 
-    table.remove(_SVDB.Char.Spec.Panels, index)
+    table.remove(CharSV().Panels, index)
 
     LockPanels()
     OnSpecChanged()
@@ -891,7 +892,7 @@ function ExportSettings()
     chkAuraBlackList:Show()
     chkClassBuffList:Show()
     chkCurrentSpec:Show()
-    chkAllSpec:Show()
+    chkAllSpec:SetShown(Scorpio.IsRetail)
     confirmButton:Show()
     result:Hide()
 
@@ -930,7 +931,7 @@ function loadImportSettings()
 end
 
 function OpenMenu(self)
-    local panel                 = _SVDB.Char.Spec.Panels[self.Index]
+    local panel                 = CharSV().Panels[self.Index]
     if not panel then return end
 
     ShowDropDownMenu{
@@ -1271,4 +1272,14 @@ function OpenMenu(self)
             click               = LockPanels,
         },
     }
+end
+
+if Scorpio.IsRetail then
+    function CharSV()
+        return _SVDB.Char.Spec
+    end
+else
+    function CharSV()
+        return _SVDB.Char
+    end
 end

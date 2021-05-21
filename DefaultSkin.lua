@@ -16,6 +16,8 @@ BORDER_SIZE                     = 1
 BAR_HEIGHT                      = 3
 ICON_BORDER_SIZE                = 1
 
+HEALTHBAR                       = Scorpio.IsRetail and "PredictionHealthBar" or "HealthBar"
+
 SHARE_NAMELABEL_SKIN            = {
     NameLabel                   = {
         drawLayer               = "OVERLAY",
@@ -115,12 +117,14 @@ Style.UpdateSkin("Default",     {
         SHARE_NAMELABEL_SKIN,
 
         NameLabel               = {
-            location            = { Anchor("TOPLEFT", 14, -2, "PredictionHealthBar"), Anchor("BOTTOMRIGHT", -14, 2, "PredictionHealthBar") },
+            location            = { Anchor("TOPLEFT", 14, -2, HEALTHBAR), Anchor("BOTTOMRIGHT", -14, 2, HEALTHBAR) },
         },
 
-        PredictionHealthBar     = {
+        [HEALTHBAR]             = {
             SHARE_STATUSBAR_SKIN,
             location            = { Anchor("TOPLEFT"), Anchor("TOPRIGHT"), Anchor("BOTTOM", 0, BORDER_SIZE, "PowerBar", "TOP") },
+            value               = Scorpio.IsRetail and CLEAR or Wow.UnitHealthFrequent(),
+            statusBarColor      = Scorpio.IsRetail and CLEAR or Wow.UnitConditionColor(true, Color.RED),
 
             backgroundFrame     = {
                 backdropBorderColor = Wow.UnitIsTarget():Map(function(val) return val and Color.WHITE or Color.BLACK end),
@@ -145,10 +149,10 @@ Style.UpdateSkin("Default",     {
         RaidRosterIcon          = {
             location            = { Anchor("TOPLEFT") },
         },
-        RoleIcon                = {
+        RoleIcon                = Scorpio.IsRetail and {
             location            = { Anchor("TOPRIGHT") },
             visible             = Wow.PlayerInCombat():Map(function(val) return not val end),
-        },
+        } or nil,
         LeaderIcon              = {
             location            = { Anchor("CENTER", 0, 0, nil, "TOPLEFT") },
         },
@@ -186,7 +190,7 @@ Style.UpdateSkin("Default",     {
             orientation         = Orientation.VERTICAL,
             topToBottom         = false,
             leftToRight         = false,
-            location            = { Anchor("BOTTOMRIGHT", 0, 0, "PredictionHealthBar") },
+            location            = { Anchor("BOTTOMRIGHT", 0, 0, HEALTHBAR) },
 
             auraFilter          = "HARMFUL",
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return not _AuraBlackList[spellID] end,
@@ -202,7 +206,7 @@ Style.UpdateSkin("Default",     {
             orientation         = Orientation.HORIZONTAL,
             topToBottom         = false,
             leftToRight         = true,
-            location            = { Anchor("BOTTOM", 0, 0, "PredictionHealthBar") },
+            location            = { Anchor("BOTTOM", 0, 0, HEALTHBAR) },
 
             auraFilter          = "HELPFUL",
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return _ClassBuffList[name] or _ClassBuffList[spellID] end,
