@@ -133,7 +133,7 @@ Style.UpdateSkin("Default",     {
         PowerBar                = {
             SHARE_STATUSBAR_SKIN,
             location            = { Anchor("BOTTOMLEFT"), Anchor("BOTTOMRIGHT") },
-            height              = BORDER_SIZE,
+            height              = 4,
         },
 
         -- Icon Indicators
@@ -163,8 +163,8 @@ Style.UpdateSkin("Default",     {
         -- Aura Panels
         BuffPanel               = {
             elementType         = AshAuraPanelIcon,
-            rowCount            = 2,
-            columnCount         = 3,
+            rowCount            = 3,
+            columnCount         = 2,
             elementWidth        = 12,
             elementHeight       = 12,
             hSpacing            = 1,
@@ -181,8 +181,8 @@ Style.UpdateSkin("Default",     {
         },
         DebuffPanel             = {
             elementType         = AshAuraPanelIcon,
-            rowCount            = 2,
-            columnCount         = 3,
+            rowCount            = 3,
+            columnCount         = 2,
             elementWidth        = 12,
             elementHeight       = 12,
             hSpacing            = 1,
@@ -193,7 +193,7 @@ Style.UpdateSkin("Default",     {
             location            = { Anchor("BOTTOMRIGHT", 0, 0, HEALTHBAR) },
 
             auraFilter          = "HARMFUL",
-            customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return not _AuraBlackList[spellID] end,
+            customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return not (_AuraBlackList[spellID] or _EnlargeDebuffList[spellID]) end,
         },
         ClassBuffPanel          = {
             elementType         = AshClassPanelIcon,
@@ -210,6 +210,22 @@ Style.UpdateSkin("Default",     {
 
             auraFilter          = "HELPFUL",
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return _ClassBuffList[name] or _ClassBuffList[spellID] end,
+        },
+        EnlargeDebuffPanel      = {
+            elementType         = AshClassPanelIcon, -- no-click no-tip
+            rowCount            = 2,
+            columnCount         = 3,
+            elementWidth        = 16,
+            elementHeight       = 16,
+            hSpacing            = 1,
+            vSpacing            = 1,
+            orientation         = Orientation.HORIZONTAL,
+            topToBottom         = true,
+            leftToRight         = false,
+            location            = { Anchor("TOPRIGHT", 0, 0, HEALTHBAR) },
+
+            auraFilter          = "HARMFUL",
+            customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return _EnlargeDebuffList[spellID] end,
         },
     },
 

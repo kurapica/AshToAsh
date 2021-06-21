@@ -44,11 +44,13 @@ function OnLoad()
     _SVDB:SetDefault{
         AuraBlackList           = {},
         ClassBuffList           = {},
+        EnlargeDebuffList       = {},
     }
 
     -- Global Settings
     _AuraBlackList              = _SVDB.AuraBlackList
     _ClassBuffList              = _SVDB.ClassBuffList
+    _EnlargeDebuffList          = _SVDB.EnlargeDebuffList
 
     if Scorpio.IsRetail and not next(_ClassBuffList) then
         -- Paladin
@@ -369,6 +371,7 @@ ExportGuide:Hide()
 
 chkAuraBlackList                = UICheckButton("AuraBlackList", ExportGuide)
 chkClassBuffList                = UICheckButton("ClassBuffList", ExportGuide)
+chkEnlargeDebuffList            = UICheckButton("EnlargeDebuffList", ExportGuide)
 chkCurrentSpec                  = UIRadioButton("CurrentSpec",   ExportGuide)
 chkAllSpec                      = UIRadioButton("AllSpec",       ExportGuide)
 confirmButton                   = UIPanelButton("Confirm",       ExportGuide)
@@ -388,8 +391,12 @@ Style[ExportGuide]              = {
         location                = { Anchor("TOP", 0, -16, "AuraBlackList", "BOTTOM") },
         label                   = { text = _Locale["Class Buff List"] },
     },
-    CurrentSpec                 = {
+    EnlargeDebuffList           = {
         location                = { Anchor("TOP", 0, -16, "ClassBuffList", "BOTTOM") },
+        label                   = { text = _Locale["Enlarge Debuff List"] },
+    },
+    CurrentSpec                 = {
+        location                = { Anchor("TOP", 0, -16, "EnlargeDebuffList", "BOTTOM") },
         label                   = { text = _Locale[Scorpio.IsRetail and "Current Specialization" or "Current Settings"] },
     },
     AllSpec                     = {
@@ -421,6 +428,9 @@ function confirmButton:OnClick()
             if chkClassBuffList:GetChecked() then
                 settings.ClassBuffList  = XDictionary(_ClassBuffList).Keys:ToList():Sort()
             end
+            if chkEnlargeDebuffList:GetChecked() then
+                settings.EnlargeDebuffList = XDictionary(_EnlargeDebuffList).Keys:ToList():Sort()
+            end
             if chkCurrentSpec:GetChecked() then
                 settings.CurrentSpec    = {
                     AuraPriority        = CharSV().AuraPriority,
@@ -441,6 +451,7 @@ function confirmButton:OnClick()
 
             chkAuraBlackList:Hide()
             chkClassBuffList:Hide()
+            chkEnlargeDebuffList:Hide()
             chkCurrentSpec:Hide()
             chkAllSpec:Hide()
             confirmButton:Show()
@@ -462,6 +473,12 @@ function confirmButton:OnClick()
             if chkClassBuffList:GetChecked() and settings.ClassBuffList then
                 for k in pairs(settings.ClassBuffList) do
                     _ClassBuffList[k]   = true
+                end
+            end
+
+            if chkEnlargeDebuffList:GetChecked() and settings.EnlargeDebuffList then
+                for k in pairs(settings.EnlargeDebuffList) do
+                    _EnlargeDebuffList[k] = true
                 end
             end
 
@@ -488,6 +505,7 @@ function confirmButton:OnClick()
             if ok and type(settings) == "table" then
                 chkAuraBlackList:Show()
                 chkClassBuffList:Show()
+                chkEnlargeDebuffList:Show()
                 chkCurrentSpec:Show()
                 chkAllSpec:SetShown(Scorpio.IsRetail)
                 confirmButton:Show()
@@ -509,6 +527,14 @@ function confirmButton:OnClick()
                     chkClassBuffList:SetChecked(false)
                 end
 
+                if settings.EnlargeDebuffList then
+                    chkEnlargeDebuffList:Enable()
+                    chkEnlargeDebuffList:SetChecked(true)
+                else
+                    chkEnlargeDebuffList:Disable()
+                    chkEnlargeDebuffList:SetChecked(false)
+                end
+
                 if settings.CurrentSpec then
                     chkCurrentSpec:Enable()
                     chkAllSpec:Disable()
@@ -524,7 +550,6 @@ function confirmButton:OnClick()
                 ExportGuide.TempSettings = settings
             end
         end
-
     end
 end
 
@@ -880,6 +905,13 @@ function OpenClassBuffList()
     Browser:Show()
 end
 
+function OpenEnlargeDebuffList()
+    Style[Browser].Header.text = _Locale["Enlarge Debuff List"]
+    Browser.TargetList          = _EnlargeDebuffList
+    viewer:SetText(TEMPLATE_AURA{ target = _EnlargeDebuffList })
+    Browser:Show()
+end
+
 function OpenAuraPriorityList()
     Style[Browser].Header.text  = _Locale["Aura Priority List"]
     Browser.TargetList          = _AuraPriority
@@ -891,6 +923,7 @@ function ExportSettings()
     Style[ExportGuide].Header.text = _Locale["Export"]
     chkAuraBlackList:Show()
     chkClassBuffList:Show()
+    chkEnlargeDebuffList:Show()
     chkCurrentSpec:Show()
     chkAllSpec:SetShown(Scorpio.IsRetail)
     confirmButton:Show()
@@ -898,12 +931,14 @@ function ExportSettings()
 
     chkAuraBlackList:Enable()
     chkClassBuffList:Enable()
+    chkEnlargeDebuffList:Enable()
     chkCurrentSpec:Enable()
     chkAllSpec:Enable()
     confirmButton:Enable()
 
     chkAuraBlackList:SetChecked(true)
     chkClassBuffList:SetChecked(true)
+    chkEnlargeDebuffList:SetChecked(true)
     chkCurrentSpec:SetChecked(true)
     chkAllSpec:SetChecked(false)
 
@@ -974,6 +1009,10 @@ function OpenMenu(self)
                 {
                     text        = _Locale["Class Buff List"],
                     click       = OpenClassBuffList,
+                },
+                {
+                    text        = _Locale["Enlarge Debuff List"],
+                    click       = OpenEnlargeDebuffList,
                 },
                 {
                     text        = _Locale["Aura Priority List"],

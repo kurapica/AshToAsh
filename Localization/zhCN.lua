@@ -4,6 +4,7 @@ if not L then return end
 L["Add"]                        = "增加"
 L["Aura Black List"]            = "增益黑名单"
 L["Class Buff List"]            = "职业增益名单"
+L["Enlarge Debuff List"] 		= "重点减益名单"
 L["Aura Priority List"]         = "增益优先列表"
 L["Current Specialization"]     = "当前专精"
 L["Current Settings"] 			= "当前配置"

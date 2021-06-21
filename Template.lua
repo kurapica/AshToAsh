@@ -15,6 +15,9 @@ __Sealed__() class "AshUnitFrame"     { Scorpio.Secure.UnitFrame, HoverSpellGrou
 --- The pet unit frame
 __Sealed__() class "AshPetUnitFrame"  { Scorpio.Secure.UnitFrame, HoverSpellGroup = { default = HOVER_SPELL_GROUP } }
 
+__ChildProperty__(Scorpio.Secure.UnitFrame, "EnlargeDebuffPanel")
+__Sealed__() class "EnlargeDebuffPanel"  { Scorpio.Secure.UnitFrame.AuraPanel }
+
 --- The unit watch panel
 __Sealed__() class "AshUnitWatchPanel" (function(_ENV)
     inherit "Scorpio.Secure.SecurePanel"
@@ -171,10 +174,19 @@ __Sealed__() class "AshAuraPanelIcon" (function(_ENV)
         local parent            = self:GetParent()
         if not parent then return end
         if IsAltKeyDown() and button == "RightButton" then
-            local name, _, _, _, _, _, _, _, _, spellID = UnitAura(parent.Unit, self.AuraIndex, parent.Filter)
+            local name, _, _, _, _, _, _, _, _, spellID = UnitAura(parent.Unit, self.AuraIndex, parent.AuraFilter)
 
             if name then
                 _AuraBlackList[spellID] = true
+
+                -- Force the refreshing
+                Scorpio.FireSystemEvent("UNIT_AURA", "any")
+            end
+        elseif IsControlKeyDown() and button == "LeftButton" and parent.AuraFilter:match("HARMFUL") then
+            local name, _, _, _, _, _, _, _, _, spellID = UnitAura(parent.Unit, self.AuraIndex, parent.AuraFilter)
+
+            if name then
+                _EnlargeDebuffList[spellID] = true
 
                 -- Force the refreshing
                 Scorpio.FireSystemEvent("UNIT_AURA", "any")
