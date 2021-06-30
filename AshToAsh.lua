@@ -456,7 +456,7 @@ function confirmButton:OnClick()
             chkAllSpec:Hide()
             confirmButton:Show()
 
-            result:SetText(Base64.Encode(Deflate.Encode(Toolset.tostring(settings))))
+            result:SetText(Base64.Encode(Deflate.Encode(Toolset.tostring(settings)), true))
             result:Show()
         else
             ExportGuide:Hide()
