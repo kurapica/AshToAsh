@@ -1,7 +1,7 @@
-## Interface: 90005
+## Interface: 90100
 ## Title: AshToAsh
 ## Author: kurapica125@outlook.com
-## Version: r009
+## Version: r010
 ## Notes: A skin supported raid panel with full features
 ## Dependencies: Scorpio.Unit, Scorpio.Widget
 ## DefaultState: Enabled
