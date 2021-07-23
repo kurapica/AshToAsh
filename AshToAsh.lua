@@ -969,7 +969,7 @@ function OpenMenu(self)
     local panel                 = CharSV().Panels[self.Index]
     if not panel then return end
 
-    ShowDropDownMenu{
+    local menu                  = {
         {
             text                = _Locale["Add Panel"],
             submenu             = {
@@ -1311,6 +1311,10 @@ function OpenMenu(self)
             click               = LockPanels,
         },
     }
+
+    FireSystemEvent("ASHTOASH_OPEN_MENU", panel, menu)
+
+    return ShowDropDownMenu(menu)
 end
 
 if Scorpio.IsRetail then
