@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [r012] - 2021-07-28
+- Fix the UnitWatch Panel continue show removed units.
+
 ## [1.1.0] - 2021-03-16
 - Auto Hide Macro Condition List Added in the Menu.
 

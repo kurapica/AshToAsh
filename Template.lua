@@ -6,7 +6,7 @@
 --========================================================--
 
 --========================================================--
-Scorpio           "AshToAsh.Template"                "1.0.0"
+Scorpio           "AshToAsh.Template"                "1.0.1"
 --========================================================--
 
 --- The unit frame template class to be used in the raid panel
@@ -28,8 +28,6 @@ __Sealed__() class "AshUnitWatchPanel" (function(_ENV)
     local _TankList             = {}
 
     local function refreshElements(self, list)
-        self.Count              = list and #list or 0
-
         local onlyEnemy         = self.ShowEnemyOnly
 
         for i = 1, self.Count do
@@ -41,14 +39,18 @@ __Sealed__() class "AshUnitWatchPanel" (function(_ENV)
             end
             unitframe.Unit      = unit
 
-            if onlyEnemy and not unit:match("nameplate") then
-                unitframe.UnitWatchEnabled  = false
-                unitframe.StateRegistered   = true
-                unitframe:RegisterStateDriver("visibility", ("[@%s,harm]show;hide"):format(unit))
-            else
-                unitframe.UnitWatchEnabled  = true
+            if unit then
+                if onlyEnemy and not unit:match("nameplate") then
+                    unitframe.UnitWatchEnabled  = false
+                    unitframe.StateRegistered   = true
+                    unitframe:RegisterStateDriver("visibility", ("[@%s,harm]show;hide"):format(unit))
+                else
+                    unitframe.UnitWatchEnabled  = true
+                end
             end
         end
+
+        self.Count              = list and #list or 0
     end
 
     ------------------------------------------------------
