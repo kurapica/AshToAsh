@@ -1,7 +1,7 @@
 ## Interface: 90100
 ## Title: AshToAsh
 ## Author: kurapica125@outlook.com
-## Version: r013
+## Version: r014
 ## Notes: A skin supported raid panel with full features
 ## Dependencies: Scorpio
 ## DefaultState: Enabled

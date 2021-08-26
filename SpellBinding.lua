@@ -121,5 +121,5 @@ function OnEnter(self)
 end
 
 function OnLeave(self)
-    GameTooltip:Hide()
+    SpellButton_OnLeave(self:GetParent())
 end

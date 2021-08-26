@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [r014] - 2021-08-26
+- Fix the action won't stop flash when using spell binding.
+
 ## [r012] - 2021-07-28
 - Fix the UnitWatch Panel continue show removed units.
 
