@@ -1,7 +1,7 @@
-## Interface: 20501
+## Interface: 20502
 ## Title: AshToAsh
 ## Author: kurapica125@outlook.com
-## Version: r014
+## Version: @project-version@
 ## Notes: A skin supported raid panel with full features
 ## Dependencies: Scorpio
 ## DefaultState: Enabled

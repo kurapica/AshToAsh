@@ -1,13 +1,18 @@
 ## Interface: 90100
+## Interface-Retail: 90100
+## Interface-Classic: 11307
+## Interface-BCC: 20502
 ## Title: AshToAsh
 ## Author: kurapica125@outlook.com
-## Version: r014
+## Version: @project-version@
 ## Notes: A skin supported raid panel with full features
 ## Dependencies: Scorpio
 ## DefaultState: Enabled
 ## LoadOnDemand: 0
 ## SavedVariables: AshToAsh_DB
 ## SavedVariablesPerCharacter: AshToAsh_CharDB
+## X-Curse-Project-ID: 425642
+## X-Wago-ID: kaNeRX62
 
 # Localization
 localization\zhCN.lua
