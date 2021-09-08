@@ -126,9 +126,9 @@ function OnLoad()
 
                     groupBy             = "NONE",
                     sortBy              = "INDEX",
-                    classFilter         = Toolset.clone(DEFAULT_CLASS_SORT_ORDER),
-                    roleFilter          = Toolset.clone(DEFAULT_ROLE_SORT_ORDER),
-                    groupFilter         = Toolset.clone(DEFAULT_GROUP_SORT_ORDER),
+                    classFilter         = function() return Toolset.clone(DEFAULT_CLASS_SORT_ORDER) end,
+                    roleFilter          = function() return Toolset.clone(DEFAULT_ROLE_SORT_ORDER) end,
+                    groupFilter         = function() return Toolset.clone(DEFAULT_GROUP_SORT_ORDER) end,
                 }
             }
         }
@@ -606,13 +606,31 @@ function ReLocation(self)
 end
 
 function GetClassFilter(self, panel)
-    local config                = {}
+    local config                = {
+        {
+            text                = _Locale["All Check"],
+            click               = function()
+                panel.Style.classFilter = Toolset.clone(DEFAULT_CLASS_SORT_ORDER)
+                Style[self].classFilter = Toolset.clone(DEFAULT_CLASS_SORT_ORDER)
+            end,
+        },
+        {
+            text                = _Locale["All Clear"],
+            click               = function()
+                wipe(panel.Style.classFilter)
+                Style[self].classFilter = {}
+            end,
+        },
+        {
+            separator           = true,
+        }
+    }
     local map                   = {}
 
     for i, v in ipairs(panel.Style.classFilter) do
         map[v]                  = i
 
-        config[i]               = {
+        table.insert(config,    {
             text                = _Locale[v:lower():gsub("^%w", string.upper)],
             check               = {
                 get             = function() return true end,
@@ -623,7 +641,7 @@ function GetClassFilter(self, panel)
                     Style[self].classFilter = Toolset.clone(panel.Style.classFilter)
                 end,
             }
-        }
+        })
     end
 
     for i, v in ipairs(DEFAULT_CLASS_SORT_ORDER) do
@@ -647,13 +665,31 @@ function GetClassFilter(self, panel)
 end
 
 function GetRoleFilter(self, panel)
-    local config                = {}
+    local config                = {
+        {
+            text                = _Locale["All Check"],
+            click               = function()
+                panel.Style.classFilter = Toolset.clone(DEFAULT_ROLE_SORT_ORDER)
+                Style[self].classFilter = Toolset.clone(DEFAULT_ROLE_SORT_ORDER)
+            end,
+        },
+        {
+            text                = _Locale["All Clear"],
+            click               = function()
+                wipe(panel.Style.roleFilter)
+                Style[self].roleFilter = {}
+            end,
+        },
+        {
+            separator           = true,
+        }
+    }
     local map                   = {}
 
     for i, v in ipairs(panel.Style.roleFilter) do
         map[v]                  = i
 
-        config[i]               = {
+        table.insert(config,    {
             text                = _Locale[v:lower():gsub("^%w", string.upper)],
             check               = {
                 get             = function() return true end,
@@ -664,7 +700,7 @@ function GetRoleFilter(self, panel)
                     Style[self].roleFilter = Toolset.clone(panel.Style.roleFilter)
                 end,
             }
-        }
+        })
     end
 
     for i, v in ipairs(DEFAULT_ROLE_SORT_ORDER) do
@@ -688,13 +724,31 @@ function GetRoleFilter(self, panel)
 end
 
 function GetGroupFilter(self, panel)
-    local config                = {}
+    local config                = {
+        {
+            text                = _Locale["All Check"],
+            click               = function()
+                panel.Style.classFilter = Toolset.clone(DEFAULT_GROUP_SORT_ORDER)
+                Style[self].classFilter = Toolset.clone(DEFAULT_GROUP_SORT_ORDER)
+            end,
+        },
+        {
+            text                = _Locale["All Clear"],
+            click               = function()
+                wipe(panel.Style.groupFilter)
+                Style[self].groupFilter = {}
+            end,
+        },
+        {
+            separator           = true,
+        }
+    }
     local map                   = {}
 
     for i, v in ipairs(panel.Style.groupFilter) do
         map[v]                  = i
 
-        config[i]               = {
+        table.insert(config,    {
             text                = tostring(v),
             check               = {
                 get             = function() return true end,
@@ -705,7 +759,7 @@ function GetGroupFilter(self, panel)
                     Style[self].groupFilter = Toolset.clone(panel.Style.groupFilter)
                 end,
             }
-        }
+        })
     end
 
     for i, v in ipairs(DEFAULT_GROUP_SORT_ORDER) do
@@ -800,7 +854,7 @@ function GetAutoHideMenu(self, panel)
     return config
 end
 
-function AddPanel(self, type)
+function AddPanel(self, type, panel)
     NoCombat()
 
     if type == PanelType.UnitWatch then
@@ -809,19 +863,19 @@ function AddPanel(self, type)
             Style                   = {
                 location            = { Anchor("TOPLEFT", 4, 0, self:GetName(), "TOPRIGHT") },
 
-                autoHide            = {},
+                autoHide            = panel and Toolset.clone(panel.Style.autoHide) or {},
 
-                columnCount         = 1,
-                rowCount            = 5,
-                elementWidth        = 80,
-                elementHeight       = 32,
-                orientation         = "VERTICAL",
-                leftToRight         = true,
-                topToBottom         = true,
-                hSpacing            = 2,
-                vSpacing            = 2,
+                columnCount         = panel and panel.Style.columnCount or 1,
+                rowCount            = panel and panel.Style.rowCount or 5,
+                elementWidth        = panel and panel.Style.elementWidth or 80,
+                elementHeight       = panel and panel.Style.elementHeight or 32,
+                orientation         = panel and panel.Style.orientation or "VERTICAL",
+                leftToRight         = not panel or panel.Style.leftToRight,
+                topToBottom         = not panel or panel.Style.topToBottom,
+                hSpacing            = panel and panel.Style.hSpacing or 2,
+                vSpacing            = panel and panel.Style.vSpacing or 2,
 
-                showEnemyOnly       = false,
+                showEnemyOnly       = panel and panel.Style.showEnemyOnly or false,
                 unitWatchList       = { "target" },
             }
         })
@@ -831,29 +885,29 @@ function AddPanel(self, type)
             Style                   = {
                 location            = { Anchor("TOPLEFT", 4, 0, self:GetName(), "TOPRIGHT") },
 
-                autoHide            = {},
+                autoHide            = panel and Toolset.clone(panel.Style.autoHide) or {},
 
-                columnCount         = 1,
-                rowCount            = 5,
-                elementWidth        = 80,
-                elementHeight       = 32,
-                orientation         = "VERTICAL",
-                leftToRight         = true,
-                topToBottom         = true,
-                hSpacing            = 2,
-                vSpacing            = 2,
+                columnCount         = panel and panel.Style.columnCount or 1,
+                rowCount            = panel and panel.Style.rowCount or 5,
+                elementWidth        = panel and panel.Style.elementWidth or 80,
+                elementHeight       = panel and panel.Style.elementHeight or 32,
+                orientation         = panel and panel.Style.orientation or "VERTICAL",
+                leftToRight         = not panel or panel.Style.leftToRight,
+                topToBottom         = not panel or panel.Style.topToBottom,
+                hSpacing            = panel and panel.Style.hSpacing or 2,
+                vSpacing            = panel and panel.Style.vSpacing or 2,
 
-                showRaid            = true,
-                showParty           = true,
-                showSolo            = true,
-                showPlayer          = true,
-                showDeadOnly        = false,
+                showRaid            = not panel or panel.Style.showRaid,
+                showParty           = not panel or panel.Style.showParty,
+                showSolo            = not panel or panel.Style.showSolo,
+                showPlayer          = not panel or panel.Style.showPlayer,
+                showDeadOnly        = panel and panel.Style.showDeadOnly or false,
 
-                groupBy             = "NONE",
-                sortBy              = "INDEX",
-                classFilter         = Toolset.clone(DEFAULT_CLASS_SORT_ORDER),
-                roleFilter          = Toolset.clone(DEFAULT_ROLE_SORT_ORDER),
-                groupFilter         = Toolset.clone(DEFAULT_GROUP_SORT_ORDER),
+                groupBy             = panel and panel.Style.groupBy or "NONE",
+                sortBy              = panel and panel.Style.sortBy or "INDEX",
+                classFilter         = Toolset.clone(panel and panel.Style.classFilter or DEFAULT_CLASS_SORT_ORDER),
+                roleFilter          = Toolset.clone(panel and panel.Style.roleFilter or DEFAULT_ROLE_SORT_ORDER),
+                groupFilter         = Toolset.clone(panel and panel.Style.groupFilter or DEFAULT_GROUP_SORT_ORDER),
             }
         })
     end
@@ -977,7 +1031,7 @@ function OpenMenu(self)
                     text        = _Locale["Unit Panel"],
                     click       = function()
                         if Confirm(_Locale["Do you want create a new unit panel?"]) then
-                            AddPanel(self, PanelType.Unit)
+                            AddPanel(self, PanelType.Unit, panel.Type == PanelType.Unit and Confirm(_Locale["Do you want copy the current panel?"]) and panel)
                         end
                     end,
                 },
@@ -985,7 +1039,7 @@ function OpenMenu(self)
                     text        = _Locale["Unit Pet Panel"],
                     click       = function()
                         if Confirm(_Locale["Do you want create a new unit pet panel?"]) then
-                            AddPanel(self, PanelType.Pet)
+                            AddPanel(self, PanelType.Pet, panel.Type == PanelType.Pet and Confirm(_Locale["Do you want copy the current panel?"]) and panel)
                         end
                     end,
                 },
@@ -993,7 +1047,7 @@ function OpenMenu(self)
                     text        = _Locale["Unit Watch Panel"],
                     click       = function()
                         if Confirm(_Locale["Do you want create a single unit watch panel?"]) then
-                            AddPanel(self, PanelType.UnitWatch)
+                            AddPanel(self, PanelType.UnitWatch, panel.Type == PanelType.UnitWatch and Confirm(_Locale["Do you want copy the current panel?"]) and panel)
                         end
                     end,
                 },
