@@ -16,7 +16,7 @@ BORDER_SIZE                     = 1
 BAR_HEIGHT                      = 3
 ICON_BORDER_SIZE                = 1
 
-HEALTHBAR                       = (Scorpio.IsRetail or IsAddOnLoaded("LibHealComm-4.0") or pcall(_G.LibStub, "LibHealComm-4.0")) and "PredictionHealthBar" or "HealthBar"
+HEALTHBAR                       = (Scorpio.IsRetail or Scorpio.IsBCC or IsAddOnLoaded("LibHealComm-4.0") or pcall(_G.LibStub, "LibHealComm-4.0")) and "PredictionHealthBar" or "HealthBar"
 
 SHARE_NAMELABEL_SKIN            = {
     NameLabel                   = {
