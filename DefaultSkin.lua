@@ -210,6 +210,7 @@ Style.UpdateSkin("Default",     {
 
             auraFilter          = "HELPFUL",
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return _ClassBuffList[name] or _ClassBuffList[spellID] end,
+            visible             = AshToAsh.FromConfig():Map(function() return next(_ClassBuffList) and true or false end)
         },
         EnlargeDebuffPanel      = {
             elementType         = AshClassPanelIcon, -- no-click no-tip
@@ -226,6 +227,7 @@ Style.UpdateSkin("Default",     {
 
             auraFilter          = "HARMFUL",
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return _EnlargeDebuffList[spellID] end,
+            visible             = AshToAsh.FromConfig():Map(function() return next(_EnlargeDebuffList) and true or false end)
         },
     },
 

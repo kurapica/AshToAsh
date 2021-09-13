@@ -9,6 +9,8 @@
 Scorpio           "AshToAsh"                         "1.1.0"
 --========================================================--
 
+__Final__() __Sealed__() interface "AshToAsh" {}
+
 namespace "AshToAsh"
 
 export { tremove = table.remove, tinsert = table.insert }
@@ -184,6 +186,17 @@ function OnSpecChanged()
 
     _AuraPriority               = CharSV().AuraPriority
     SUBJECT_BUFF_PRIORITY:OnNext(Toolset.clone(_AuraPriority))
+
+    OnConfigChanged()
+end
+
+function OnConfigChanged()
+    FireSystemEvent("ASHTOASH_CONFIG_CHANGED")
+end
+
+__Static__() __AutoCache__()
+function AshToAsh.FromConfig()
+    return Wow.FromUnitEvent(Wow.FromEvent("ASHTOASH_CONFIG_CHANGED"):Map("=>'any'"))
 end
 
 -----------------------------------------------------------
@@ -308,6 +321,7 @@ function viewer:OnHyperlinkClick(id)
         for i, v in ipairs(_AuraPriority) do
             if v == id then
                 tremove(_AuraPriority, i)
+                GameTooltip:Hide()
                 break
             end
         end
@@ -361,6 +375,8 @@ function Browser:OnHide()
     if Browser.TargetList == _AuraPriority then
         SUBJECT_BUFF_PRIORITY:OnNext(Toolset.clone(_AuraPriority))
     end
+
+    OnConfigChanged()
 end
 
 -----------------------------------------------------------
@@ -612,6 +628,8 @@ function GetClassFilter(self, panel)
             click               = function()
                 panel.Style.classFilter = Toolset.clone(DEFAULT_CLASS_SORT_ORDER)
                 Style[self].classFilter = Toolset.clone(DEFAULT_CLASS_SORT_ORDER)
+
+                OnConfigChanged()
             end,
         },
         {
@@ -619,6 +637,8 @@ function GetClassFilter(self, panel)
             click               = function()
                 wipe(panel.Style.classFilter)
                 Style[self].classFilter = {}
+
+                OnConfigChanged()
             end,
         },
         {
@@ -639,6 +659,8 @@ function GetClassFilter(self, panel)
 
                     table.remove(panel.Style.classFilter, i)
                     Style[self].classFilter = Toolset.clone(panel.Style.classFilter)
+
+                    OnConfigChanged()
                 end,
             }
         })
@@ -655,6 +677,8 @@ function GetClassFilter(self, panel)
 
                         table.insert(panel.Style.classFilter, v)
                         Style[self].classFilter = Toolset.clone(panel.Style.classFilter)
+
+                        OnConfigChanged()
                     end,
                 }
             })
@@ -671,6 +695,8 @@ function GetRoleFilter(self, panel)
             click               = function()
                 panel.Style.classFilter = Toolset.clone(DEFAULT_ROLE_SORT_ORDER)
                 Style[self].classFilter = Toolset.clone(DEFAULT_ROLE_SORT_ORDER)
+
+                OnConfigChanged()
             end,
         },
         {
@@ -678,6 +704,8 @@ function GetRoleFilter(self, panel)
             click               = function()
                 wipe(panel.Style.roleFilter)
                 Style[self].roleFilter = {}
+
+                OnConfigChanged()
             end,
         },
         {
@@ -698,6 +726,8 @@ function GetRoleFilter(self, panel)
 
                     table.remove(panel.Style.roleFilter, i)
                     Style[self].roleFilter = Toolset.clone(panel.Style.roleFilter)
+
+                    OnConfigChanged()
                 end,
             }
         })
@@ -714,6 +744,8 @@ function GetRoleFilter(self, panel)
 
                         table.insert(panel.Style.roleFilter, v)
                         Style[self].roleFilter = Toolset.clone(panel.Style.roleFilter)
+
+                        OnConfigChanged()
                     end,
                 }
             })
@@ -730,6 +762,8 @@ function GetGroupFilter(self, panel)
             click               = function()
                 panel.Style.classFilter = Toolset.clone(DEFAULT_GROUP_SORT_ORDER)
                 Style[self].classFilter = Toolset.clone(DEFAULT_GROUP_SORT_ORDER)
+
+                OnConfigChanged()
             end,
         },
         {
@@ -737,6 +771,8 @@ function GetGroupFilter(self, panel)
             click               = function()
                 wipe(panel.Style.groupFilter)
                 Style[self].groupFilter = {}
+
+                OnConfigChanged()
             end,
         },
         {
@@ -757,6 +793,8 @@ function GetGroupFilter(self, panel)
 
                     table.remove(panel.Style.groupFilter, i)
                     Style[self].groupFilter = Toolset.clone(panel.Style.groupFilter)
+
+                    OnConfigChanged()
                 end,
             }
         })
@@ -773,6 +811,8 @@ function GetGroupFilter(self, panel)
 
                         table.insert(panel.Style.groupFilter, v)
                         Style[self].groupFilter = Toolset.clone(panel.Style.groupFilter)
+
+                        OnConfigChanged()
                     end,
                 }
             })
@@ -795,6 +835,8 @@ function GetWatchUnits(self, panel)
 
                     table.insert(panel.Style.unitWatchList, new)
                     Style[self].unitWatchList = Toolset.clone(panel.Style.unitWatchList)
+
+                    OnConfigChanged()
                 end
             end,
         },
@@ -810,6 +852,8 @@ function GetWatchUnits(self, panel)
                 if Confirm(_Locale["Do you want delete the watch unit"]) then
                     table.remove(panel.Style.unitWatchList, i)
                     Style[self].unitWatchList = Toolset.clone(panel.Style.unitWatchList)
+
+                    OnConfigChanged()
                 end
             end,
         })
@@ -831,6 +875,8 @@ function GetAutoHideMenu(self, panel)
 
                     table.insert(panel.Style.autoHide, new)
                     Style[self].autoHide = Toolset.clone(panel.Style.autoHide)
+
+                    OnConfigChanged()
                 end
             end,
         },
@@ -846,6 +892,8 @@ function GetAutoHideMenu(self, panel)
                 if Confirm(_Locale["Do you want delete the macro condition"]) then
                     table.remove(panel.Style.autoHide, i)
                     Style[self].autoHide = Toolset.clone(panel.Style.autoHide)
+
+                    OnConfigChanged()
                 end
             end,
         })

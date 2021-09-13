@@ -180,18 +180,20 @@ __Sealed__() class "AshAuraPanelIcon" (function(_ENV)
 
             if name then
                 _AuraBlackList[spellID] = true
+                OnConfigChanged()
 
                 -- Force the refreshing
-                Scorpio.FireSystemEvent("UNIT_AURA", "any")
+                Next(Scorpio.FireSystemEvent, "UNIT_AURA", "any")
             end
         elseif IsControlKeyDown() and button == "LeftButton" and parent.AuraFilter:match("HARMFUL") then
             local name, _, _, _, _, _, _, _, _, spellID = UnitAura(parent.Unit, self.AuraIndex, parent.AuraFilter)
 
             if name then
                 _EnlargeDebuffList[spellID] = true
+                OnConfigChanged()
 
                 -- Force the refreshing
-                Scorpio.FireSystemEvent("UNIT_AURA", "any")
+                Next(Scorpio.FireSystemEvent, "UNIT_AURA", "any")
             end
         end
     end
