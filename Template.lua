@@ -10,16 +10,19 @@ Scorpio           "AshToAsh.Template"                "1.0.1"
 --========================================================--
 
 --- The unit frame template class to be used in the raid panel
-__Sealed__() class "AshUnitFrame"     { Scorpio.Secure.UnitFrame, HoverSpellGroup = { default = HOVER_SPELL_GROUP } }
+__Sealed__() class "AshUnitFrame"       { Scorpio.Secure.UnitFrame, HoverSpellGroup = { default = HOVER_SPELL_GROUP } }
 
 --- The pet unit frame
-__Sealed__() class "AshPetUnitFrame"  { Scorpio.Secure.UnitFrame, HoverSpellGroup = { default = HOVER_SPELL_GROUP } }
+__Sealed__() class "AshPetUnitFrame"    { Scorpio.Secure.UnitFrame, HoverSpellGroup = { default = HOVER_SPELL_GROUP } }
 
-__ChildProperty__(Scorpio.Secure.UnitFrame, "EnlargeDebuffPanel")
-__Sealed__() class "EnlargeDebuffPanel"  { Scorpio.Secure.UnitFrame.AuraPanel }
+--- The ash unit panel
+__Sealed__() class "AshGroupPanel"      { Scorpio.Secure.SecureGroupPanel }
+
+--- The ash pet unit panel
+__Sealed__() class "AshGroupPetPanel"   { Scorpio.Secure.SecureGroupPetPanel }
 
 --- The unit watch panel
-__Sealed__() class "AshUnitWatchPanel" (function(_ENV)
+__Sealed__() class "AshUnitWatchPanel"  (function(_ENV)
     inherit "Scorpio.Secure.SecurePanel"
 
     export { tinsert            = table.insert }
@@ -166,10 +169,13 @@ __Sealed__() class "AshUnitWatchPanel" (function(_ENV)
     property "ShowEnemyOnly"    { handler = Refresh, type = Boolean }
 end)
 
--- Aura Panel Icon
-__Sealed__() class "AshClassPanelIcon" { Scorpio.Secure.UnitFrame.AuraPanelIcon }
+__ChildProperty__(Scorpio.Secure.UnitFrame, "EnlargeDebuffPanel")
+__Sealed__() class "EnlargeDebuffPanel" { Scorpio.Secure.UnitFrame.AuraPanel }
 
-__Sealed__() class "AshAuraPanelIcon" (function(_ENV)
+-- Aura Panel Icon
+__Sealed__() class "AshClassPanelIcon"  { Scorpio.Secure.UnitFrame.AuraPanelIcon }
+
+__Sealed__() class "AshAuraPanelIcon"   (function(_ENV)
     inherit "AshClassPanelIcon"
 
     local function OnMouseUp(self, button)

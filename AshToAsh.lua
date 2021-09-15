@@ -148,8 +148,8 @@ function OnSpecChanged()
 
         if not upanel then
             upanel              = (panel.Type == PanelType.UnitWatch and AshUnitWatchPanel
-                                or panel.Type == PanelType.Pet       and SecureGroupPetPanel
-                                or SecureGroupPanel)("AshToAsh" .. panel.Type .. index)
+                                or panel.Type == PanelType.Pet       and AshGroupPetPanel
+                                or AshGroupPanel)("AshToAsh" .. panel.Type .. index)
 
             upanel.ElementType  = panel.Type == PanelType.Pet and AshPetUnitFrame or AshUnitFrame
             upanel.ElementPrefix= "AshToAsh" .. panel.Type .. index .. "Unit"
