@@ -693,8 +693,8 @@ function GetRoleFilter(self, panel)
         {
             text                = _Locale["All Check"],
             click               = function()
-                panel.Style.classFilter = Toolset.clone(DEFAULT_ROLE_SORT_ORDER)
-                Style[self].classFilter = Toolset.clone(DEFAULT_ROLE_SORT_ORDER)
+                panel.Style.roleFilter = Toolset.clone(DEFAULT_ROLE_SORT_ORDER)
+                Style[self].roleFilter = Toolset.clone(DEFAULT_ROLE_SORT_ORDER)
 
                 OnConfigChanged()
             end,
@@ -760,8 +760,8 @@ function GetGroupFilter(self, panel)
         {
             text                = _Locale["All Check"],
             click               = function()
-                panel.Style.classFilter = Toolset.clone(DEFAULT_GROUP_SORT_ORDER)
-                Style[self].classFilter = Toolset.clone(DEFAULT_GROUP_SORT_ORDER)
+                panel.Style.groupFilter = Toolset.clone(DEFAULT_GROUP_SORT_ORDER)
+                Style[self].groupFilter = Toolset.clone(DEFAULT_GROUP_SORT_ORDER)
 
                 OnConfigChanged()
             end,
