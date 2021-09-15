@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [r020] - 2021-09-15
+- Fix the all check role filter, class filter cause error.
+
 ## [r015] - 2021-09-08
 - Fix the grop, role, class filter be reset.
 - Panel can be clone now, choose add panel, the system will ask you.
