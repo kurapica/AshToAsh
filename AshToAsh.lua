@@ -135,6 +135,24 @@ function OnLoad()
             }
         }
     }
+
+
+    -- Auto Locale Strings
+    if _G.GetClassInfo then
+        for i = 1, 30 do
+            local name, cls     = GetClassInfo(i)
+
+            if name and cls then
+                _Locale[cls]    = name
+            end
+        end
+    end
+
+    for i, v in ipairs{ "MAINTANK", "MAINASSIST", "TANK", "HEALER", "DAMAGER", "NONE"} do
+        if type(_G[v]) == "string" then
+            _Locale[v]          = _G[v]
+        end
+    end
 end
 
 function OnSpecChanged()
@@ -571,6 +589,206 @@ end
 
 
 -----------------------------------------------------------
+-- Group X Filter X Order UI
+-----------------------------------------------------------
+GroupGuide                      = Dialog("AshToAsh_Group_Guide")
+GroupGuide:Hide()
+
+GroupViewer                     = HtmlViewer("Viewer", GroupGuide)
+GroupConfirmButton              = UIPanelButton("Confirm", GroupGuide)
+
+Style[GroupGuide]               = {
+    Header                      = {
+        text                    = _Locale["Group Settings"],
+    },
+    size                        = Size(600, 400),
+    clampedToScreen             = true,
+    minResize                   = Size(400, 400),
+
+    Confirm                     = {
+        location                = { Anchor("BOTTOMLEFT", 24, 16 ) },
+        text                    = _G.CLOSE or "Close",
+    },
+    Viewer                      = {
+        location                = { Anchor("TOPLEFT", 24, -32), Anchor("BOTTOMRIGHT", -48, 48) },
+        enableMouse             = true,
+    },
+}
+
+function ShowGroupGuid(panel, frame)
+    GroupGuide.panel            = panel
+    GroupGuide.frame            = frame
+
+    GroupViewer:SetText(TEMPLATE_GROUP_SETTINGS{
+        _Locale                 = _Locale,
+        panel                   = panel,
+        DEFAULT_GROUP_SORT_ORDER= DEFAULT_GROUP_SORT_ORDER,
+        DEFAULT_CLASS_SORT_ORDER= DEFAULT_CLASS_SORT_ORDER,
+        DEFAULT_ROLE_SORT_ORDER = DEFAULT_ROLE_SORT_ORDER,
+    })
+
+    GroupGuide:Show()
+end
+
+function GroupViewer:OnHyperlinkClick(path)
+    local panel, frame          = GroupGuide.panel, GroupGuide.frame
+
+    if path:match("^groupby:") then
+        local groupBy           = path:match("%w+$")
+        panel.Style.groupBy     = groupBy
+        Style[frame].groupBy    = groupBy
+    elseif path:match("^sortby:") then
+        local sortBy            = path:match("%w+$")
+        panel.Style.sortBy      = sortBy
+        Style[frame].sortBy     = sortBy
+    elseif path:match("^delgrp") then
+        local grp               = tonumber(path:match("%d+$"))
+        if not grp then return end
+
+        local new               = XList(panel.Style.groupFilter):Filter(function(v) return v ~= grp end):ToTable()
+
+        panel.Style.groupFilter = new
+        Style[frame].groupFilter= new
+
+    elseif path:match("^addgrp") then
+        local grp               = tonumber(path:match("%d+$"))
+        if not grp then return end
+
+        if XList(panel.Style.groupFilter):First(function(v) return v == grp end) then return end
+
+        tinsert(panel.Style.groupFilter, grp)
+        Style[frame].groupFilter= Toolset.clone(panel.Style.groupFilter)
+
+    elseif path:match("^delcls") then
+        local cls               = path:match("%w+$")
+        if not cls then return end
+
+        local new               = XList(panel.Style.classFilter):Filter(function(v) return v ~= cls end):ToTable()
+
+        panel.Style.classFilter = new
+        Style[frame].classFilter= new
+
+    elseif path:match("^addcls") then
+        local cls               = path:match("%w+$")
+        if not cls then return end
+
+        if XList(panel.Style.classFilter):First(function(v) return v == cls end) then return end
+
+        tinsert(panel.Style.classFilter, cls)
+        Style[frame].classFilter= Toolset.clone(panel.Style.classFilter)
+
+    elseif path:match("^delrole") then
+        local role              = path:match("%w+$")
+        if not role then return end
+
+        local new               = XList(panel.Style.roleFilter ):Filter(function(v) return v ~= role end):ToTable()
+
+        panel.Style.roleFilter  = new
+        Style[frame].roleFilter = new
+
+    elseif path:match("^addrole") then
+        local role              = path:match("%w+$")
+        if not role then return end
+
+        if XList(panel.Style.roleFilter):First(function(v) return v == role end) then return end
+
+        tinsert(panel.Style.roleFilter, role)
+        Style[frame].roleFilter= Toolset.clone(panel.Style.roleFilter)
+
+    end
+
+    return ShowGroupGuid(panel, frame)
+end
+
+function GroupConfirmButton:OnClick()
+    GroupGuide:Hide()
+
+    GroupGuide.frame:Refresh()
+end
+
+TEMPLATE_GROUP_SETTINGS         = TemplateString[[
+    <html>
+        <body>
+            <h1><cyan>@\_Locale["Group By"]</cyan></h1>
+            <p>
+                <lightblue>@\_Locale["Current"] :</lightblue> @\_Locale[panel.Style.groupBy]
+            </p>
+            <p>
+                <lightblue>@\_Locale["Options"] :</lightblue>
+                <a href="groupby:NONE">@\_Locale["NONE"]</a>,
+                <a href="groupby:GROUP">@\_Locale["GROUP"]</a>,
+                <a href="groupby:CLASS">@\_Locale["CLASS"]</a>,
+                <a href="groupby:ROLE">@\_Locale["ROLE"]</a>,
+                <a href="groupby:ASSIGNEDROLE">@\_Locale["ASSIGNEDROLE"]</a>
+            </p>
+            <br/>
+
+            <h1><cyan>@\_Locale["Sort By"]</cyan></h1>
+            <p>
+                <lightblue>@\_Locale["Current"] :</lightblue> @\_Locale[panel.Style.sortBy]
+            </p>
+            <p>
+                <lightblue>@\_Locale["Options"] :</lightblue>
+                <a href="sortby:INDEX">@\_Locale["INDEX"]</a>
+                <a href="sortby:NAME">@\_Locale["NAME"]</a>
+            </p>
+            <br/>
+
+            <h1><cyan>@\_Locale["Group Filter & Order"]</cyan></h1>
+            <p>
+                <lightblue>@\_Locale["Current"] :</lightblue>
+                @local length = #panel.Style.groupFilter
+                @for i, v in ipairs(panel.Style.groupFilter) do
+                    <a href="delgrp:@v">@v</a> @(i < length and "," or "")
+                @end
+            </p>
+            <p>
+                <lightblue>@\_Locale["Options"] :</lightblue>
+                @>length = #DEFAULT_GROUP_SORT_ORDER
+                @for i, v in ipairs(DEFAULT_GROUP_SORT_ORDER) do
+                    <a href="addgrp:@v">@v</a> @(i < length and "," or "")
+                @end
+            </p>
+            <br/>
+
+            <h1><cyan>@\_Locale["Class Filter & Order"]</cyan></h1>
+            <p>
+                <lightblue>@\_Locale["Current"] :</lightblue>
+                @> length = #panel.Style.classFilter
+                @for i, v in ipairs(panel.Style.classFilter) do
+                    <a href="delcls:@v">@\_Locale[v]</a> @(i < length and "," or "")
+                @end
+            </p>
+            <p>
+                <lightblue>@\_Locale["Options"] :</lightblue>
+                @> length = #DEFAULT_CLASS_SORT_ORDER
+                @for i, v in ipairs(DEFAULT_CLASS_SORT_ORDER) do
+                    <a href="addcls:@v">@\_Locale[v]</a> @(i < length and "," or "")
+                @end
+            </p>
+            <br/>
+
+            <h1><cyan>@\_Locale["Role Filter & Order"]</cyan></h1>
+            <p>
+                <lightblue>@\_Locale["Current"] :</lightblue>
+                @> length = #panel.Style.roleFilter
+                @for i, v in ipairs(panel.Style.roleFilter) do
+                    <a href="delrole:@v">@\_Locale[v]</a> @(i < length and "," or "")
+                @end
+            </p>
+            <p>
+                <lightblue>@\_Locale["Options"] :</lightblue>
+                @> length = #DEFAULT_ROLE_SORT_ORDER
+                @for i, v in ipairs(DEFAULT_ROLE_SORT_ORDER) do
+                    <a href="addrole:@v">@\_Locale[v]</a> @(i < length and "," or "")
+                @end
+            </p>
+            <br/>
+        </body>
+    </html>
+]]
+
+-----------------------------------------------------------
 -- Helpers
 -----------------------------------------------------------
 function OpenMaskMenu(self, button)
@@ -619,207 +837,6 @@ function ReLocation(self)
     local location              = self:GetLocation({ Anchor("TOPLEFT", 0, 0, nil, "CENTER") })
     CharSV().Panels[self.Index].Style.location = location
     Style[self].location= location
-end
-
-function GetClassFilter(self, panel)
-    local config                = {
-        {
-            text                = _Locale["All Check"],
-            click               = function()
-                panel.Style.classFilter = Toolset.clone(DEFAULT_CLASS_SORT_ORDER)
-                Style[self].classFilter = Toolset.clone(DEFAULT_CLASS_SORT_ORDER)
-
-                OnConfigChanged()
-            end,
-        },
-        {
-            text                = _Locale["All Clear"],
-            click               = function()
-                wipe(panel.Style.classFilter)
-                Style[self].classFilter = {}
-
-                OnConfigChanged()
-            end,
-        },
-        {
-            separator           = true,
-        }
-    }
-    local map                   = {}
-
-    for i, v in ipairs(panel.Style.classFilter) do
-        map[v]                  = i
-
-        table.insert(config,    {
-            text                = _Locale[v:lower():gsub("^%w", string.upper)],
-            check               = {
-                get             = function() return true end,
-                set             = function(value)
-                    if value then return end
-
-                    table.remove(panel.Style.classFilter, i)
-                    Style[self].classFilter = Toolset.clone(panel.Style.classFilter)
-
-                    OnConfigChanged()
-                end,
-            }
-        })
-    end
-
-    for i, v in ipairs(DEFAULT_CLASS_SORT_ORDER) do
-        if not map[v] then
-            table.insert(config, {
-                text            = _Locale[v:lower():gsub("^%w", string.upper)],
-                check           = {
-                    get         = function() return false end,
-                    set         = function(value)
-                        if not value then return end
-
-                        table.insert(panel.Style.classFilter, v)
-                        Style[self].classFilter = Toolset.clone(panel.Style.classFilter)
-
-                        OnConfigChanged()
-                    end,
-                }
-            })
-        end
-    end
-
-    return config
-end
-
-function GetRoleFilter(self, panel)
-    local config                = {
-        {
-            text                = _Locale["All Check"],
-            click               = function()
-                panel.Style.roleFilter = Toolset.clone(DEFAULT_ROLE_SORT_ORDER)
-                Style[self].roleFilter = Toolset.clone(DEFAULT_ROLE_SORT_ORDER)
-
-                OnConfigChanged()
-            end,
-        },
-        {
-            text                = _Locale["All Clear"],
-            click               = function()
-                wipe(panel.Style.roleFilter)
-                Style[self].roleFilter = {}
-
-                OnConfigChanged()
-            end,
-        },
-        {
-            separator           = true,
-        }
-    }
-    local map                   = {}
-
-    for i, v in ipairs(panel.Style.roleFilter) do
-        map[v]                  = i
-
-        table.insert(config,    {
-            text                = _Locale[v:lower():gsub("^%w", string.upper)],
-            check               = {
-                get             = function() return true end,
-                set             = function(value)
-                    if value then return end
-
-                    table.remove(panel.Style.roleFilter, i)
-                    Style[self].roleFilter = Toolset.clone(panel.Style.roleFilter)
-
-                    OnConfigChanged()
-                end,
-            }
-        })
-    end
-
-    for i, v in ipairs(DEFAULT_ROLE_SORT_ORDER) do
-        if not map[v] then
-            table.insert(config, {
-                text            = _Locale[v:lower():gsub("^%w", string.upper)],
-                check           = {
-                    get         = function() return false end,
-                    set         = function(value)
-                        if not value then return end
-
-                        table.insert(panel.Style.roleFilter, v)
-                        Style[self].roleFilter = Toolset.clone(panel.Style.roleFilter)
-
-                        OnConfigChanged()
-                    end,
-                }
-            })
-        end
-    end
-
-    return config
-end
-
-function GetGroupFilter(self, panel)
-    local config                = {
-        {
-            text                = _Locale["All Check"],
-            click               = function()
-                panel.Style.groupFilter = Toolset.clone(DEFAULT_GROUP_SORT_ORDER)
-                Style[self].groupFilter = Toolset.clone(DEFAULT_GROUP_SORT_ORDER)
-
-                OnConfigChanged()
-            end,
-        },
-        {
-            text                = _Locale["All Clear"],
-            click               = function()
-                wipe(panel.Style.groupFilter)
-                Style[self].groupFilter = {}
-
-                OnConfigChanged()
-            end,
-        },
-        {
-            separator           = true,
-        }
-    }
-    local map                   = {}
-
-    for i, v in ipairs(panel.Style.groupFilter) do
-        map[v]                  = i
-
-        table.insert(config,    {
-            text                = tostring(v),
-            check               = {
-                get             = function() return true end,
-                set             = function(value)
-                    if value then return end
-
-                    table.remove(panel.Style.groupFilter, i)
-                    Style[self].groupFilter = Toolset.clone(panel.Style.groupFilter)
-
-                    OnConfigChanged()
-                end,
-            }
-        })
-    end
-
-    for i, v in ipairs(DEFAULT_GROUP_SORT_ORDER) do
-        if not map[v] then
-            table.insert(config, {
-                text            = tostring(v),
-                check           = {
-                    get         = function() return false end,
-                    set         = function(value)
-                        if not value then return end
-
-                        table.insert(panel.Style.groupFilter, v)
-                        Style[self].groupFilter = Toolset.clone(panel.Style.groupFilter)
-
-                        OnConfigChanged()
-                    end,
-                }
-            })
-        end
-    end
-
-    return config
 end
 
 function GetWatchUnits(self, panel)
@@ -1332,72 +1349,9 @@ function OpenMenu(self)
         } or
         {
             text                = _Locale["Group"],
-            submenu             = {
-                {
-                    text        = _Locale["Group By"],
-                    submenu     = {
-                        check   = {
-                            get = function() return panel.Style.groupBy end,
-                            set = function(value)
-                                panel.Style.groupBy = value
-                                Style[self].groupBy = value
-                            end,
-                        },
-                        {
-                            text        = _Locale["None"],
-                            checkvalue  = "NONE",
-                        },
-                        {
-                            text        = _Locale["Group"],
-                            checkvalue  = "GROUP",
-                        },
-                        {
-                            text        = _Locale["Class"],
-                            checkvalue  = "CLASS",
-                        },
-                        {
-                            text        = _Locale["Role"],
-                            checkvalue  = "ROLE",
-                        },
-                        {
-                            text        = _Locale["Assignedrole"],
-                            checkvalue  = "ASSIGNEDROLE",
-                        },
-                    },
-                },
-                {
-                    text        = _Locale["Sort By"],
-                    submenu     = {
-                        check   = {
-                            get = function() return panel.Style.sortBy end,
-                            set = function(value)
-                                panel.Style.sortBy = value
-                                Style[self].sortBy = value
-                            end,
-                        },
-                        {
-                            text        = _Locale["Index"],
-                            checkvalue  = "INDEX",
-                        },
-                        {
-                            text        = _Locale["Name"],
-                            checkvalue  = "NAME",
-                        },
-                    },
-                },
-                {
-                    text        = _Locale["Group Filter & Order"],
-                    submenu     = GetGroupFilter(self, panel),
-                },
-                {
-                    text        = _Locale["Class Filter & Order"],
-                    submenu     = GetClassFilter(self, panel),
-                },
-                {
-                    text        = _Locale["Role Filter & Order"],
-                    submenu     = GetRoleFilter(self, panel),
-                },
-            },
+            click               = function()
+                ShowGroupGuid(panel, self)
+            end,
         },
         {
             text                = _Locale["Delete Panel"],

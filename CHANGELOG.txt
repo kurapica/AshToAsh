@@ -1,6 +1,9 @@
 # Changelog
 All notable changes to this project will be documented in this file.
 
+## [r021] - 2021-09-19
+- Use a new dialog for the group settings for easy configurations.
+
 ## [r020] - 2021-09-15
 - Fix the all check role filter, class filter cause error.
 
