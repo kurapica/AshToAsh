@@ -729,7 +729,7 @@ TEMPLATE_GROUP_SETTINGS         = TemplateString[[
             </p>
             <p>
                 <lightblue>@\_Locale["Options"] :</lightblue>
-                <a href="sortby:INDEX">@\_Locale["INDEX"]</a>
+                <a href="sortby:INDEX">@\_Locale["INDEX"]</a>,
                 <a href="sortby:NAME">@\_Locale["NAME"]</a>
             </p>
             <br/>
