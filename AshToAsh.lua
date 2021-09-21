@@ -706,6 +706,10 @@ function GroupConfirmButton:OnClick()
     GroupGuide.frame:Refresh()
 end
 
+function GroupGuide:OnHide()
+    OnConfigChanged()
+end
+
 TEMPLATE_GROUP_SETTINGS         = TemplateString[[
     <html>
         <body>
