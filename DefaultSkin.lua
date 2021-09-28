@@ -16,6 +16,9 @@ BORDER_SIZE                     = 1
 BAR_HEIGHT                      = 3
 ICON_BORDER_SIZE                = 1
 
+CASTBAR_NORMAL_COLOR            = Color.WHITE
+CASTBAR_NONINTERRUPTIBLE_COLOR  = Color.DEATHKNIGHT
+
 HEALTHBAR                       = (Scorpio.IsRetail or Scorpio.IsBCC or IsAddOnLoaded("LibHealComm-4.0") or pcall(_G.LibStub, "LibHealComm-4.0")) and "PredictionHealthBar" or "HealthBar"
 
 SHARE_NAMELABEL_SKIN            = {
@@ -132,8 +135,34 @@ Style.UpdateSkin("Default",     {
         },
         PowerBar                = {
             SHARE_STATUSBAR_SKIN,
+            frameStrata         = "LOW",
             location            = { Anchor("BOTTOMLEFT"), Anchor("BOTTOMRIGHT") },
             height              = 4,
+        },
+        CastBar                 = {
+            SHARE_STATUSBAR_SKIN,
+
+            frameStrata         = "HIGH",
+            statusBarColor      = Color.MAGE,
+
+            location            = { Anchor("BOTTOMLEFT"), Anchor("BOTTOMRIGHT") },
+            height              = 4,
+
+            RightBGTexture      = {
+                file            = [[Interface\CastingBar\UI-CastingBar-Spark]],
+                alphaMode       = "ADD",
+                location        = { Anchor("LEFT", -16, 0, "statusBarTexture", "RIGHT"), Anchor("TOP", 0, 4), Anchor("BOTTOM", 0, -4) },
+                size            = Size(32, 32),
+            },
+
+            Label               = {
+                justifyH        = "CENTER",
+                drawLayer       = "OVERLAY",
+                font            = FontType(STANDARD_TEXT_FONT, 8),
+                shadowColor     = Color.WHITE,
+                location        = { Anchor("BOTTOM") },
+                text            = Wow.UnitCastName(),
+            },
         },
 
         -- Icon Indicators

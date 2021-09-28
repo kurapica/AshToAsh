@@ -817,16 +817,16 @@ function ReLocation(self)
         local location
 
         -- Auto Attach
-        if math.abs(top - panel:GetBottom()) <= 10 then
+        if math.abs(top - panel:GetBottom()) <= 10 and math.abs(left - panel:GetLeft()) <= 10 then
             location            = self:GetLocation({ Anchor("TOPLEFT", 0, 0, panel:GetName(), "BOTTOMLEFT") })
             location[1].x       = 0
-        elseif math.abs(bottom - panel:GetTop()) <= 10 then
+        elseif math.abs(bottom - panel:GetTop()) <= 10 and math.abs(left - panel:GetLeft()) <= 10 then
             location            = self:GetLocation({ Anchor("BOTTOMLEFT", 0, 0, panel:GetName(), "TOPLEFT") })
             location[1].x       = 0
-        elseif math.abs(left - panel:GetRight()) <= 10 then
+        elseif math.abs(left - panel:GetRight()) <= 10 and math.abs(top - panel:GetTop()) <= 10 then
             location            = self:GetLocation({ Anchor("TOPLEFT", 0, 0, panel:GetName(), "TOPRIGHT") })
             location[1].y       = 0
-        elseif math.abs(right - panel:GetLeft()) <= 10 then
+        elseif math.abs(right - panel:GetLeft()) <= 10 and math.abs(top - panel:GetTop()) <= 10 then
             location            = self:GetLocation({ Anchor("TOPRIGHT", 0, 0, panel:GetName(), "TOPLEFT") })
             location[1].y       = 0
         end
