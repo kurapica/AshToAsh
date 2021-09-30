@@ -265,12 +265,12 @@ end
 -----------------------------------------------------------
 -- Object Event Handler
 -----------------------------------------------------------
-function RECYCLE_MASKS:OnInit(mask)
-    mask.OnClick                = OpenMaskMenu
-    mask.OnStopMoving           = ReLocation
+RECYCLE_MASKS.OnInit            = RECYCLE_MASKS.OnInit + function(self, mask)
+    mask.OnClick                = mask.OnClick + OpenMaskMenu
+    mask.OnStopMoving           = mask.OnStopMoving + ReLocation
 end
 
-function RECYCLE_MASKS:OnPush(mask)
+RECYCLE_MASKS.OnPush            = RECYCLE_MASKS.OnPush + function(self, mask)
     mask:SetParent(HIDDEN_FRAME)
     mask:GetChild("KeyBindText"):SetText("")
 end
@@ -1372,7 +1372,7 @@ function OpenMenu(self)
         },
     }
 
-    FireSystemEvent("ASHTOASH_OPEN_MENU", panel, menu)
+    FireSystemEvent("ASHTOASH_OPEN_MENU", self, menu)
 
     return ShowDropDownMenu(menu)
 end

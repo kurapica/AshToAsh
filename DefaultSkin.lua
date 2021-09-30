@@ -19,8 +19,6 @@ ICON_BORDER_SIZE                = 1
 CASTBAR_NORMAL_COLOR            = Color.WHITE
 CASTBAR_NONINTERRUPTIBLE_COLOR  = Color.DEATHKNIGHT
 
-HEALTHBAR                       = (Scorpio.IsRetail or Scorpio.IsBCC or IsAddOnLoaded("LibHealComm-4.0") or pcall(_G.LibStub, "LibHealComm-4.0")) and "PredictionHealthBar" or "HealthBar"
-
 SHARE_NAMELABEL_SKIN            = {
     NameLabel                   = {
         drawLayer               = "OVERLAY",
@@ -120,10 +118,10 @@ Style.UpdateSkin("Default",     {
         SHARE_NAMELABEL_SKIN,
 
         NameLabel               = {
-            location            = { Anchor("TOPLEFT", 14, -2, HEALTHBAR), Anchor("BOTTOMRIGHT", -14, 2, HEALTHBAR) },
+            location            = { Anchor("TOPLEFT", 14, -2, "PredictionHealthBar"), Anchor("BOTTOMRIGHT", -14, 2, "PredictionHealthBar") },
         },
 
-        [HEALTHBAR]             = {
+        PredictionHealthBar     = {
             SHARE_STATUSBAR_SKIN,
             location            = { Anchor("TOPLEFT"), Anchor("TOPRIGHT"), Anchor("BOTTOM", 0, BORDER_SIZE, "PowerBar", "TOP") },
             value               = Scorpio.IsRetail and CLEAR or Wow.UnitHealthFrequent(),
@@ -219,7 +217,7 @@ Style.UpdateSkin("Default",     {
             orientation         = Orientation.VERTICAL,
             topToBottom         = false,
             leftToRight         = false,
-            location            = { Anchor("BOTTOMRIGHT", 0, 0, HEALTHBAR) },
+            location            = { Anchor("BOTTOMRIGHT", 0, 0, "PredictionHealthBar") },
 
             auraFilter          = "HARMFUL",
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return not (_AuraBlackList[spellID] or _EnlargeDebuffList[spellID]) end,
@@ -235,7 +233,7 @@ Style.UpdateSkin("Default",     {
             orientation         = Orientation.HORIZONTAL,
             topToBottom         = false,
             leftToRight         = true,
-            location            = { Anchor("BOTTOM", 0, 0, HEALTHBAR) },
+            location            = { Anchor("BOTTOM", 0, 0, "PredictionHealthBar") },
 
             auraFilter          = "HELPFUL",
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return _ClassBuffList[name] or _ClassBuffList[spellID] end,
@@ -252,7 +250,7 @@ Style.UpdateSkin("Default",     {
             orientation         = Orientation.HORIZONTAL,
             topToBottom         = true,
             leftToRight         = false,
-            location            = { Anchor("TOPRIGHT", 0, 0, HEALTHBAR) },
+            location            = { Anchor("TOPRIGHT", 0, 0, "PredictionHealthBar") },
 
             auraFilter          = "HARMFUL",
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return _EnlargeDebuffList[spellID] end,
