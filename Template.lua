@@ -25,15 +25,19 @@ __Sealed__() class "AshGroupPetPanel"   { Scorpio.Secure.SecureGroupPetPanel }
 __Sealed__() class "AshUnitWatchPanel"  (function(_ENV)
     inherit "Scorpio.Secure.SecurePanel"
 
-    export { tinsert            = table.insert }
+    export {
+        tinsert                 = table.insert,
+        UnitGroupRolesAssigned  = _G.UnitGroupRolesAssigned or Toolset.fakefunc,
+    }
 
     local _TempList             = {}
     local _TankList             = {}
 
     local function refreshElements(self, list)
         local onlyEnemy         = self.ShowEnemyOnly
+        local count             = list and #list or 0
 
-        for i = 1, self.Count do
+        for i = 1, count do
             local unit          = list[i]
             local unitframe     = self.Elements[i]
             if unitframe.StateRegistered then
@@ -53,7 +57,11 @@ __Sealed__() class "AshUnitWatchPanel"  (function(_ENV)
             end
         end
 
-        self.Count              = list and #list or 0
+        for i = self.Count, count + 1, -1 do
+            self.Elements[i].Unit = nil
+        end
+
+        self.Count              = count
     end
 
     ------------------------------------------------------
@@ -90,12 +98,25 @@ __Sealed__() class "AshUnitWatchPanel"  (function(_ENV)
                         unit            = "raid" .. i
                         if GetPartyAssignment("MAINTANK", unit) then
                             maintank    = unit
+
+                            if not _TempList[unit] then
+                                _TempList[unit] = true
+                                tinsert(_TankList, unit)
+                            end
                         elseif GetPartyAssignment("MAINASSIST", unit) then
                             mainassist  = unit
+
+                            if not _TempList[unit] then
+                                _TempList[unit] = true
+                                tinsert(_TankList, unit)
+                            end
                         end
 
                         if UnitGroupRolesAssigned(unit) == "TANK" then
-                            tinsert(_TankList, unit)
+                            if not _TempList[unit] then
+                                _TempList[unit] = true
+                                tinsert(_TankList, unit)
+                            end
                         end
                     end
                 else
@@ -104,15 +125,30 @@ __Sealed__() class "AshUnitWatchPanel"  (function(_ENV)
 
                         if GetPartyAssignment("MAINTANK", unit) then
                             maintank    = unit
+
+                            if not _TempList[unit] then
+                                _TempList[unit] = true
+                                tinsert(_TankList, unit)
+                            end
                         elseif GetPartyAssignment("MAINASSIST", unit) then
                             mainassist  = unit
+
+                            if not _TempList[unit] then
+                                _TempList[unit] = true
+                                tinsert(_TankList, unit)
+                            end
                         end
 
                         if UnitGroupRolesAssigned(unit) == "TANK" then
-                            tinsert(_TankList, unit)
+                            if not _TempList[unit] then
+                                _TempList[unit] = true
+                                tinsert(_TankList, unit)
+                            end
                         end
                     end
                 end
+
+                wipe(_TempList)
 
                 for i, unit in ipairs(list) do
                     if unit:match("maintank") then

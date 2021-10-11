@@ -56,7 +56,7 @@ end
 -----------------------------------------------------------
 function SpellBookFrame:OnHide()
     IN_SPELL_BIND_MODE          = false
-    listSpellBindMasks:Each(listSpellBindMasks[1].Hide)
+    listSpellBindMasks:Each(SpellBookFrame.Hide)
 end
 
 -----------------------------------------------------------
