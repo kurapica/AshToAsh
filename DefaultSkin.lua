@@ -266,6 +266,12 @@ Style.UpdateSkin("Default",     {
         HealthBar               = {
             SHARE_STATUSBAR_SKIN,
             setAllPoints        = true,
+            statusBarColor      = Wow.Unit():Map(function(unit)
+                unit            = unit:gsub("pet", "")
+                if unit == "" then unit = "player" end
+                local _, cls    = UnitClass(unit)
+                if cls then return Color[cls] end
+            end),
         },
     },
 })
