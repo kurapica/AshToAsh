@@ -116,10 +116,20 @@ function OnKeyClear(self)
     end
 end
 
-function OnEnter(self)
-    SpellButton_OnEnter(self:GetParent())
-end
+if Scorpio.IsRetail then
+    function OnEnter(self)
+        self:GetParent():OnEnter()
+    end
 
-function OnLeave(self)
-    SpellButton_OnLeave(self:GetParent())
+    function OnLeave(self)
+        self:GetParent():OnLeave()
+    end
+else
+    function OnEnter(self)
+        SpellButton_OnEnter(self:GetParent())
+    end
+
+    function OnLeave(self)
+        SpellButton_OnLeave(self:GetParent())
+    end
 end
