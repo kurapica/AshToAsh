@@ -433,12 +433,12 @@ Style[ExportGuide]              = {
     },
     CurrentSpec                 = {
         location                = { Anchor("TOP", 0, -16, "EnlargeDebuffList", "BOTTOM") },
-        label                   = { text = _Locale[Scorpio.IsRetail and "Current Specialization" or "Current Settings"] },
+        label                   = { text = _Locale[(Scorpio.IsRetail or Scorpio.IsWLK) and "Current Specialization" or "Current Settings"] },
     },
     AllSpec                     = {
         location                = { Anchor("TOP", 0, -16, "CurrentSpec", "BOTTOM") },
         label                   = { text = _Locale["All Specialization"] },
-        visible                 = Scorpio.IsRetail,
+        visible                 = Scorpio.IsRetail or Scorpio.IsWLK,
     },
 
     Result                      = {
@@ -472,7 +472,7 @@ function confirmButton:OnClick()
                     AuraPriority        = CharSV().AuraPriority,
                     Panels              = CharSV().Panels,
                 }
-            elseif Scorpio.IsRetail and chkAllSpec:GetChecked() then
+            elseif (Scorpio.IsRetail or Scorpio.IsWLK) and chkAllSpec:GetChecked() then
                 settings.AllSpec        = {}
                 for i = 1, 3 do
                     local spec          = _SVDB.Char.Specs[i]
@@ -521,7 +521,7 @@ function confirmButton:OnClick()
             if chkCurrentSpec:GetChecked() and settings.CurrentSpec then
                 CharSV().AuraPriority   = settings.CurrentSpec.AuraPriority
                 CharSV().Panels         = settings.CurrentSpec.Panels
-            elseif Scorpio.IsRetail and chkAllSpec:GetChecked() and settings.AllSpec then
+            elseif (Scorpio.IsRetail or Scorpio.IsWLK) and chkAllSpec:GetChecked() and settings.AllSpec then
                 for i, v in pairs(settings.AllSpec) do
                     local spec          = _SVDB.Char.Specs[i]
                     spec.AuraPriority   = v.AuraPriority
@@ -543,7 +543,7 @@ function confirmButton:OnClick()
                 chkClassBuffList:Show()
                 chkEnlargeDebuffList:Show()
                 chkCurrentSpec:Show()
-                chkAllSpec:SetShown(Scorpio.IsRetail)
+                chkAllSpec:SetShown(Scorpio.IsRetail or Scorpio.IsWLK)
                 confirmButton:Show()
                 result:Hide()
 
@@ -1050,7 +1050,7 @@ function ExportSettings()
     chkClassBuffList:Show()
     chkEnlargeDebuffList:Show()
     chkCurrentSpec:Show()
-    chkAllSpec:SetShown(Scorpio.IsRetail)
+    chkAllSpec:SetShown(Scorpio.IsRetail or Scorpio.IsWLK)
     confirmButton:Show()
     result:Hide()
 
@@ -1379,7 +1379,7 @@ function OpenMenu(self)
     return ShowDropDownMenu(menu)
 end
 
-if Scorpio.IsRetail then
+if Scorpio.IsRetail or Scorpio.IsWLK then
     function CharSV()
         return _SVDB.Char.Spec
     end
