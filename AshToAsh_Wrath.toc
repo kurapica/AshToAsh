@@ -13,6 +13,7 @@
 
 # Localization
 localization\zhCN.lua
+localization\zhTW.lua
 
 # Core
 AshToAsh.lua

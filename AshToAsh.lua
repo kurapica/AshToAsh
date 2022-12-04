@@ -107,6 +107,7 @@ function OnLoad()
         Panels                  = {
             [1]                 = {
                 Type            = PanelType.Unit,
+                InitCount       = 25,
                 Style           = {
                     location            = { Anchor("CENTER", 30, 0) },
 
@@ -188,7 +189,7 @@ function OnSpecChanged()
 
         -- Init with count
         if panel.Type ~= PanelType.UnitWatch then
-            upanel.Count        = math.min(panel.Type == PanelType.Pet and 10 or 25, panel.Style.columnCount * panel.Style.rowCount)
+            upanel.Count        = math.min(panel.InitCount or (panel.Type == PanelType.Pet and 10 or 25), panel.Style.columnCount * panel.Style.rowCount)
         end
 
         idxMap[panel.Type]      = index
@@ -953,6 +954,7 @@ function AddPanel(self, type, panel)
     else
         table.insert(CharSV().Panels, {
             Type                    = type,
+            InitCount               = type == PanelType.Pet and 10 or 25,
             Style                   = {
                 location            = { Anchor("TOPLEFT", 4, 0, self:GetName(), "TOPRIGHT") },
 
@@ -1231,6 +1233,16 @@ function OpenMenu(self)
                         end,
                     }
                 },
+                {
+                    text                = _Locale["Init Count"] .. " - " .. (panel.InitCount or panel.Type == PanelType.Pet and 10 or 25),
+                    click               = function()
+                        local value     = PickRange(_Locale["Choose the init count"], 1, 40, 1, panel.InitCount or panel.Type == PanelType.Pet and 10 or 25)
+                        if value then
+                            panel.InitCount = value
+                            self.Count  = math.min(value, panel.Style.columnCount * panel.Style.rowCount)
+                        end
+                    end
+                }
             },
         },
         {
