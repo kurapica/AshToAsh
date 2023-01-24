@@ -243,6 +243,11 @@ function UnlockPanels()
         panel.Mask:SetParent(panel)
         panel.Mask:Show()
         panel.Mask:GetChild("KeyBindText"):SetText(panel.Index)
+
+        -- Show the unit watch panel
+        if Class.IsObjectType(panel, AshUnitWatchPanel) then
+            panel:SetAutoHide(nil)
+        end
     end
 end
 
@@ -253,9 +258,17 @@ function LockPanels()
     UNLOCK_PANELS               = false
 
     NoCombat(function()
+        local panels            = CharSV().Panels
         for i, panel in ipairs(CURRENT_UNIT_PANELS) do
             panel:SetMovable(false)
             panel.KeepMaxSize   = false
+
+            -- Set back auto hide conditions
+            if Class.IsObjectType(panel, AshUnitWatchPanel) then
+                if panels and #panels >= panel.Index then
+                    Style[panel].autoHide = Toolset.clone(panels[panel.Index].Style.autoHide)
+                end
+            end
         end
     end)
 
