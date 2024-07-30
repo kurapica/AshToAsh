@@ -10,27 +10,53 @@ Scorpio           "AshToAsh.SpellBinding"            "1.0.0"
 --========================================================--
 
 SpellGroupAccessor              = UnitFrame.HoverSpellGroups[HOVER_SPELL_GROUP]
-SpellBookFrame                  = Frame(_G.SpellBookFrame)
+SpellBookFrame                  = _G.SpellBookFrame and Frame(_G.SpellBookFrame) or false
 listSpellBindMasks              = List()
+BOOKTYPE_SPELL                  = _G.BOOKTYPE_SPELL or "spell"
+ToggleSpellBook                 = _G.ToggleSpellBook or false
 
 HELPFUL_COLOR                   = Color(0, 1, 0, 0.4)
 HARMFUL_COLOR                   = Color(1, 0, 0, 0.6)
 
 IN_SPELL_BIND_MODE              = false
 
+MaskMap                         = setmetatable({}, { __index = function(self, frame)
+    local mask                  = Mask("SpellBindingMask", frame)
+    mask.EnableKeyBinding       = true
+    mask.OnKeySet               = OnKeySet
+    mask.OnKeyClear             = OnKeyClear
+    mask.OnEnter                = OnEnter
+    mask.OnLeave                = OnLeave
+    listSpellBindMasks:Insert(mask)
+end})
+
 -----------------------------------------------------------
 -- Addon Event Handler
 -----------------------------------------------------------
+__Async__()
 function OnEnable(self)
-    for i = 1, SPELLS_PER_PAGE do
-        local mask              = Mask("SpellBindingMask", _G["SpellButton" .. i])
-        mask.EnableKeyBinding   = true
-        mask.OnKeySet           = OnKeySet
-        mask.OnKeyClear         = OnKeyClear
-        mask.OnEnter            = OnEnter
-        mask.OnLeave            = OnLeave
+    -- For retail
+    if not SpellBookFrame then
+        while not IsAddOnLoaded("Blizzard_PlayerSpells") and NextEvent("ADDON_LOADED") ~= "Blizzard_PlayerSpells" do end
+        while not (_G.PlayerSpellsFrame and _G.PlayerSpellsFrame.SpellBookFrame) do Next() end
+        SpellBookFrame          = Frame(_G.PlayerSpellsFrame.SpellBookFrame)
 
-        listSpellBindMasks:Insert(mask)
+        self:SecureHook(_G.PlayerSpellsFrame.SpellBookFrame, "UpdateDisplayedSpells", RefreshKeyBindings)
+    else
+        local i                 = 1
+        local btn               = _G["SpellButton" .. i]
+        while btn do
+            btn                 = MaskMap[btn]
+            i                   = i + 1
+            btn                 = _G["SpellButton" .. i]
+        end
+
+        self:SecureHook("SpellBookFrame_UpdateSpells", RefreshKeyBindings)
+    end
+
+    function SpellBookFrame:OnHide()
+        IN_SPELL_BIND_MODE      = false
+        listSpellBindMasks:Each(SpellBookFrame.Hide)
     end
 end
 
@@ -40,57 +66,90 @@ end
 __SlashCmd__ "/ata" "bind"
 __SlashCmd__ "/ashtoash" "bind"
 __SystemEvent__ "ASH_TO_ASH_SPELL_BINDING"
+__Async__()
 function StartSpellBinding()
     if InCombatLockdown() then return end
     IN_SPELL_BIND_MODE          = true
 
+    -- For retail
+    if not SpellBookFrame then
+        _G.PlayerSpellsFrame_LoadUI()
+        while not SpellBookFrame do Next() end
+    end
+
     if SpellBookFrame:IsShown() then
         RefreshKeyBindings()
-    else
+    elseif ToggleSpellBook then
         ToggleSpellBook(BOOKTYPE_SPELL)
+    elseif PlayerSpellsUtil then
+        PlayerSpellsUtil.OpenToSpellBookTab()
     end
-end
-
------------------------------------------------------------
--- Object Event Handler
------------------------------------------------------------
-function SpellBookFrame:OnHide()
-    IN_SPELL_BIND_MODE          = false
-    listSpellBindMasks:Each(SpellBookFrame.Hide)
 end
 
 -----------------------------------------------------------
 -- Helper
 -----------------------------------------------------------
-function GetMaskSpellID(self)
-    local parent                = self:GetParent()
-    local slot, slotType        = SpellBook_GetSpellBookSlot(parent)
 
-    if not slot or slotType == "FUTURESPELL" or slotType == "FLYOUT" or IsPassiveSpell(slot, BOOKTYPE_SPELL) then
-        return nil
-    else
-        local _, spellId        = GetSpellBookItemInfo(slot, BOOKTYPE_SPELL)
-        return spellId
-    end
-end
+if SpellBookFrame then
+    function GetMaskSpellID(self)
+        local parent            = self:GetParent()
+        local slot, slotType    = SpellBook_GetSpellBookSlot(parent)
 
-__SecureHook__ "SpellBookFrame_UpdateSpells"
-function RefreshKeyBindings()
-    if not IN_SPELL_BIND_MODE then return end
-
-    if _G.SpellBookFrame.bookType ~= BOOKTYPE_SPELL then
-        return listSpellBindMasks:Each(listSpellBindMasks[1].Hide)
-    end
-
-    for _, mask in ipairs(listSpellBindMasks) do
-        local spellId           = GetMaskSpellID(mask)
-        if spellId then
-            mask:Show()
-            mask.BindingKey     = SpellGroupAccessor.Spell[spellId].Key
-            Style[mask].backdropColor = IsHarmfulSpell(spellId) and HARMFUL_COLOR or HELPFUL_COLOR
+        if not slot or slotType == "FUTURESPELL" or slotType == "FLYOUT" or IsPassiveSpell(slot, BOOKTYPE_SPELL) then
+            return nil
         else
-            mask:Hide()
+            local _, spellId    = GetSpellBookItemInfo(slot, BOOKTYPE_SPELL)
+            return spellId
         end
+    end
+
+    function RefreshKeyBindings()
+        if not IN_SPELL_BIND_MODE then return end
+
+        if _G.SpellBookFrame.bookType ~= BOOKTYPE_SPELL then
+            return listSpellBindMasks:Each(listSpellBindMasks[1].Hide)
+        end
+
+        for _, mask in ipairs(listSpellBindMasks) do
+            local spellId       = GetMaskSpellID(mask)
+            if spellId then
+                mask:Show()
+                mask.BindingKey = SpellGroupAccessor.Spell[spellId].Key
+                Style[mask].backdropColor = IsHarmfulSpell(spellId) and HARMFUL_COLOR or HELPFUL_COLOR
+            else
+                mask:Hide()
+            end
+        end
+    end
+else
+    function GetMaskSpellID(self)
+        local parent            = self:GetParent()
+        if not parent.elementData or parent.elementData.spellBank ~= _G.Enum.SpellBookSpellBank.Player then return end
+
+        local slot, slotType    = parent.elementData.slotIndex, parent.spellBookItemInfo.itemType
+
+        if not slot or slotType == _G.Enum.SpellBookItemType.FutureSpell or slotType == _G.Enum.SpellBookItemType.Flyout or C_SpellBook.IsSpellBookItemPassive(slot, _G.Enum.SpellBookSpellBank.Player) then
+            return nil
+        else
+            local spellInfo     = GetSpellBookItemInfo(slot, _G.Enum.SpellBookSpellBank.Player)
+            return spellInfo and spellInfo.spellID
+        end
+    end
+
+    function RefreshKeyBindings()
+        local self              = _G.PlayerSpellsFrame.SpellBookFrame
+
+        self:ForEachDisplayedSpell(function(item)
+            local mask          = MaskMap[item]
+            local spellId       = GetMaskSpellID(mask)
+            if spellId then
+                mask:Show()
+                mask.BindingKey = SpellGroupAccessor.Spell[spellId].Key
+                Style[mask].backdropColor = IsHarmfulSpell(spellId) and HARMFUL_COLOR or HELPFUL_COLOR
+            else
+                mask:Hide()
+            end
+        end)
     end
 end
 
