@@ -191,7 +191,7 @@ function OnKeyClear(self)
     end
 end
 
-if not SpellButton_OnEnter then
+if not _G.SpellButton_OnEnter then
     function OnEnter(self)
         self:GetParent():OnEnter()
     end
