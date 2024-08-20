@@ -119,7 +119,17 @@ Style.UpdateSkin("Default",     {
 
         NameLabel               = {
             text                = Wow.UnitOwnerName(),
-            location            = { Anchor("TOPLEFT", 14, -2, "PredictionHealthBar"), Anchor("BOTTOMRIGHT", -14, 2, "PredictionHealthBar") },
+            textColor           = Wow.UnitOwnerColor(),
+            location            = { Anchor("BOTTOMLEFT", 14, -2, "PredictionHealthBar"), Anchor("BOTTOMRIGHT", -14, 2, "PredictionHealthBar") },
+        },
+
+        Label                   = {
+            text                = Wow.UnitName(),
+            drawLayer           = "OVERLAY",
+            location            = { Anchor("BOTTOM", 0, -2, "NameLabel", "TOP") },
+            visible             = Wow.Unit():Map(function(unit) return unit and unit:match("[pP][eE][tT]") and true or false end),
+            scale               = 0.8,
+            textColor           = Wow.UnitColor(),
         },
 
         PredictionHealthBar     = {
