@@ -120,7 +120,7 @@ Style.UpdateSkin("Default",     {
         NameLabel               = {
             text                = Wow.UnitOwnerName(),
             textColor           = Wow.UnitOwnerColor(),
-            location            = { Anchor("BOTTOMLEFT", 14, -2, "PredictionHealthBar"), Anchor("BOTTOMRIGHT", -14, 2, "PredictionHealthBar") },
+            location            = { Anchor("BOTTOMLEFT", 14, 2, "PredictionHealthBar"), Anchor("BOTTOMRIGHT", -14, 2, "PredictionHealthBar") },
         },
 
         Label                   = {
