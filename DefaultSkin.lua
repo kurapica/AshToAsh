@@ -176,7 +176,7 @@ Style.UpdateSkin("Default",     {
         RaidRosterIcon          = {
             location            = { Anchor("TOPLEFT") },
         },
-        RoleIcon                = Scorpio.IsRetail and {
+        RoleIcon                = _G.UnitGroupRolesAssigned and {
             location            = { Anchor("TOPRIGHT") },
             visible             = Wow.PlayerInCombat():Map(function(val) return not val end),
         } or nil,
