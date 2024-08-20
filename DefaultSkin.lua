@@ -126,7 +126,7 @@ Style.UpdateSkin("Default",     {
         Label                   = {
             text                = Wow.UnitName(),
             drawLayer           = "OVERLAY",
-            location            = { Anchor("BOTTOM", 0, -2, "NameLabel", "TOP") },
+            location            = { Anchor("BOTTOM", 0, 2, "NameLabel", "TOP") },
             visible             = Wow.Unit():Map(function(unit) return unit and unit:match("[pP][eE][tT]") and true or false end),
             scale               = 0.8,
             textColor           = Wow.UnitColor(),
