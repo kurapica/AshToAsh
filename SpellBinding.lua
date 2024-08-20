@@ -19,6 +19,7 @@ HELPFUL_COLOR                   = Color(0, 1, 0, 0.4)
 HARMFUL_COLOR                   = Color(1, 0, 0, 0.6)
 
 IN_SPELL_BIND_MODE              = false
+ENABLE_ITEM_HOOK                = false
 
 MaskMap                         = setmetatable({}, { __index = function(self, frame)
     local mask                  = Mask("SpellBindingMask", frame)
@@ -27,7 +28,19 @@ MaskMap                         = setmetatable({}, { __index = function(self, fr
     mask.OnKeyClear             = OnKeyClear
     mask.OnEnter                = OnEnter
     mask.OnLeave                = OnLeave
+    rawset(self, frame, mask)
     listSpellBindMasks:Insert(mask)
+
+
+    -- for retail
+    if ENABLE_ITEM_HOOK then
+        local parent        = frame:GetParent()
+        if parent.UpdateSpellData then
+            _M:SecureHook(parent, "UpdateSpellData", RefreshKeyBindings)
+        end
+    end
+
+    return mask
 end})
 
 -----------------------------------------------------------
@@ -39,7 +52,8 @@ function OnEnable(self)
     if not SpellBookFrame then
         while not IsAddOnLoaded("Blizzard_PlayerSpells") and NextEvent("ADDON_LOADED") ~= "Blizzard_PlayerSpells" do end
         while not (_G.PlayerSpellsFrame and _G.PlayerSpellsFrame.SpellBookFrame) do Next() end
-        SpellBookFrame          = Frame(_G.PlayerSpellsFrame.SpellBookFrame)
+        SpellBookFrame          = Frame(_G.PlayerSpellsFrame)
+        ENABLE_ITEM_HOOK        = true
 
         self:SecureHook(_G.PlayerSpellsFrame.SpellBookFrame, "UpdateDisplayedSpells", RefreshKeyBindings)
     else
@@ -123,24 +137,26 @@ if SpellBookFrame then
     end
 else
     function GetMaskSpellID(self)
-        local parent            = self:GetParent()
+        local parent            = self:GetParent():GetParent()
         if not parent.elementData or parent.elementData.spellBank ~= _G.Enum.SpellBookSpellBank.Player then return end
 
         local slot, slotType    = parent.elementData.slotIndex, parent.spellBookItemInfo.itemType
-
         if not slot or slotType == _G.Enum.SpellBookItemType.FutureSpell or slotType == _G.Enum.SpellBookItemType.Flyout or C_SpellBook.IsSpellBookItemPassive(slot, _G.Enum.SpellBookSpellBank.Player) then
             return nil
         else
-            local spellInfo     = GetSpellBookItemInfo(slot, _G.Enum.SpellBookSpellBank.Player)
-            return spellInfo and spellInfo.spellID
+            local _, id         = GetSpellBookItemInfo(slot, _G.Enum.SpellBookSpellBank.Player)
+            return id
         end
     end
 
+    __AsyncSingle__()
     function RefreshKeyBindings()
+        Delay(0.2)
+        if not IN_SPELL_BIND_MODE then return end
         local self              = _G.PlayerSpellsFrame.SpellBookFrame
 
         self:ForEachDisplayedSpell(function(item)
-            local mask          = MaskMap[item]
+            local mask          = MaskMap[item.Button]
             local spellId       = GetMaskSpellID(mask)
             if spellId then
                 mask:Show()
@@ -175,7 +191,7 @@ function OnKeyClear(self)
     end
 end
 
-if Scorpio.IsRetail then
+if not _G.SpellButton_OnEnter then
     function OnEnter(self)
         self:GetParent():OnEnter()
     end
