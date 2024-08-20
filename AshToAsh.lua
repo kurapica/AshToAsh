@@ -436,23 +436,23 @@ Style[ExportGuide]              = {
 
     AuraBlackList               = {
         location                = { Anchor("TOPLEFT", 24, -32) },
-        label                   = { text = _Locale["Aura Black List"] },
+        text                    = _Locale["Aura Black List"],
     },
     ClassBuffList               = {
         location                = { Anchor("TOP", 0, -16, "AuraBlackList", "BOTTOM") },
-        label                   = { text = _Locale["Class Buff List"] },
+        text                    = _Locale["Class Buff List"],
     },
     EnlargeDebuffList           = {
         location                = { Anchor("TOP", 0, -16, "ClassBuffList", "BOTTOM") },
-        label                   = { text = _Locale["Enlarge Debuff List"] },
+        text                    = _Locale["Enlarge Debuff List"],
     },
     CurrentSpec                 = {
         location                = { Anchor("TOP", 0, -16, "EnlargeDebuffList", "BOTTOM") },
-        label                   = { text = _Locale[(Scorpio.IsRetail or Scorpio.IsWLK) and "Current Specialization" or "Current Settings"] },
+        text                    = _Locale[(Scorpio.IsRetail or Scorpio.IsWLK) and "Current Specialization" or "Current Settings"],
     },
     AllSpec                     = {
         location                = { Anchor("TOP", 0, -16, "CurrentSpec", "BOTTOM") },
-        label                   = { text = _Locale["All Specialization"] },
+        text                    = _Locale["All Specialization"],
         visible                 = Scorpio.IsRetail or Scorpio.IsWLK,
     },
 
@@ -989,7 +989,7 @@ function AddPanel(self, type, panel)
                 showSolo            = not panel or panel.Style.showSolo,
                 showPlayer          = not panel or panel.Style.showPlayer,
                 showDeadOnly        = panel and panel.Style.showDeadOnly or false,
-                showVehicle         - panel and panel.Style.showVehicle or false,
+                showVehicle         = panel and panel.Style.showVehicle or false,
 
                 groupBy             = panel and panel.Style.groupBy or "NONE",
                 sortBy              = panel and panel.Style.sortBy or "INDEX",
