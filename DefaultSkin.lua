@@ -118,6 +118,7 @@ Style.UpdateSkin("Default",     {
         SHARE_NAMELABEL_SKIN,
 
         NameLabel               = {
+            text                = Wow.UnitOwnerName(true),
             location            = { Anchor("TOPLEFT", 14, -2, "PredictionHealthBar"), Anchor("BOTTOMRIGHT", -14, 2, "PredictionHealthBar") },
         },
 
