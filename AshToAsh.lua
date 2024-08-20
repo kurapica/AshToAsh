@@ -128,6 +128,7 @@ function OnLoad()
                     showSolo            = true,
                     showPlayer          = true,
                     showDeadOnly        = false,
+                    showVehicle         = false,
 
                     groupBy             = "NONE",
                     sortBy              = "INDEX",
@@ -988,6 +989,7 @@ function AddPanel(self, type, panel)
                 showSolo            = not panel or panel.Style.showSolo,
                 showPlayer          = not panel or panel.Style.showPlayer,
                 showDeadOnly        = panel and panel.Style.showDeadOnly or false,
+                showVehicle         - panel and panel.Style.showVehicle or false,
 
                 groupBy             = panel and panel.Style.groupBy or "NONE",
                 sortBy              = panel and panel.Style.sortBy or "INDEX",
@@ -1365,6 +1367,16 @@ function OpenMenu(self)
                         set     = function(value)
                             panel.Style.showDeadOnly = value
                             Style[self].showDeadOnly = value
+                        end,
+                    }
+                } or nil,
+                panel.Type == PanelType.Unit and {
+                    text        = _Locale["Show Vehicle"],
+                    check       = {
+                        get     = function() return panel.Style.showVehicle end,
+                        set     = function(value)
+                            panel.Style.showVehicle = value
+                            Style[self].showVehicle = value
                         end,
                     }
                 } or nil,
