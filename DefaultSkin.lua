@@ -118,7 +118,7 @@ Style.UpdateSkin("Default",     {
         SHARE_NAMELABEL_SKIN,
 
         NameLabel               = {
-            text                = Wow.UnitOwnerName(true),
+            text                = Wow.UnitOwnerName(),
             location            = { Anchor("TOPLEFT", 14, -2, "PredictionHealthBar"), Anchor("BOTTOMRIGHT", -14, 2, "PredictionHealthBar") },
         },
 
@@ -263,6 +263,10 @@ Style.UpdateSkin("Default",     {
     [AshPetUnitFrame]           = {
         -- Indicators
         SHARE_NAMELABEL_SKIN,
+
+        NameLabel               = {
+            text                = Wow.UnitName(),
+        },
 
         HealthBar               = {
             SHARE_STATUSBAR_SKIN,
