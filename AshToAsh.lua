@@ -302,7 +302,18 @@ input                           = InputBox     ("Input",  Browser)
 viewer                          = HtmlViewer   ("Viewer", Browser)
 addButton                       = UIPanelButton("Add",    Browser)
 
-TEMPLATE_AURA                   = TemplateString[[
+TEMPLATE_AURA                   = TemplateString(_G.C_Spell and [[
+    <html>
+        <body>
+            @for id in pairs(target) do
+            @if tonumber(id) then
+            <p><a href="@id">[@((C_Spell.GetSpellInfo(id) or {}).name)]</a></p>
+            @else
+            <p><a href="@id">[@id]</a></p>
+            @end end
+        </body>
+    </html>
+]] or [[
     <html>
         <body>
             @for id in pairs(target) do
@@ -313,9 +324,20 @@ TEMPLATE_AURA                   = TemplateString[[
             @end end
         </body>
     </html>
-]]
+]])
 
-TEMPLATE_PRIORITY               = TemplateString[[
+TEMPLATE_PRIORITY               = TemplateString(_G.C_Spell and [[
+    <html>
+        <body>
+            @for _, id in ipairs(target) do
+            @if tonumber(id) then
+            <p><a href="@id">[@((C_Spell.GetSpellInfo(id) or {}).name)]</a></p>
+            @else
+            <p><a href="@id">[@id]</a></p>
+            @end end
+        </body>
+    </html>
+]] or [[
     <html>
         <body>
             @for _, id in ipairs(target) do
@@ -326,7 +348,7 @@ TEMPLATE_PRIORITY               = TemplateString[[
             @end end
         </body>
     </html>
-]]
+]])
 
 Style[Browser]                  = {
     Header                      = { Text = "AshToAsh" },
