@@ -302,7 +302,7 @@ input                           = InputBox     ("Input",  Browser)
 viewer                          = HtmlViewer   ("Viewer", Browser)
 addButton                       = UIPanelButton("Add",    Browser)
 
-TEMPLATE_AURA                   = TemplateString(_G.C_Spell and [[
+TEMPLATE_AURA                   = TemplateString(_G.C_Spell and _G.C_Spell.GetSpellInfo and [[
     <html>
         <body>
             @for id in pairs(target) do
@@ -326,7 +326,7 @@ TEMPLATE_AURA                   = TemplateString(_G.C_Spell and [[
     </html>
 ]])
 
-TEMPLATE_PRIORITY               = TemplateString(_G.C_Spell and [[
+TEMPLATE_PRIORITY               = TemplateString(_G.C_Spell and _G.C_Spell.GetSpellInfo and [[
     <html>
         <body>
             @for _, id in ipairs(target) do
