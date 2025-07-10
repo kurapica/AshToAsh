@@ -56,6 +56,7 @@ function OnEnable(self)
         ENABLE_ITEM_HOOK        = true
 
         self:SecureHook(_G.PlayerSpellsFrame.SpellBookFrame, "UpdateDisplayedSpells", RefreshKeyBindings)
+
     else
         local i                 = 1
         local btn               = _G["SpellButton" .. i]
@@ -65,7 +66,11 @@ function OnEnable(self)
             btn                 = _G["SpellButton" .. i]
         end
 
-        self:SecureHook("SpellBookFrame_UpdateSpells", RefreshKeyBindings)
+        if _G.SpellBookFrame_UpdateSpells then
+            self:SecureHook("SpellBookFrame_UpdateSpells", RefreshKeyBindings)
+        else
+            self:SecureHook(_G.SpellBookFrame, "UpdateSpells", RefreshKeyBindings)
+        end
     end
 
     function SpellBookFrame:OnHide()
