@@ -67,7 +67,7 @@ AURA_PANEL_ICON_DEBUFF_COLOR    = {
     ["Curse"]                   = Color.CURSE,
     ["Disease"]                 = Color.DISEASE,
     ["Poison"]                  = Color.POISON,
-    [""]                        = DebuffTypeColor["none"],
+    [""]                        = Color.NONEDEBUFF,
 }
 
 -----------------------------------------------------------
@@ -120,7 +120,7 @@ Style.UpdateSkin("Default",     {
         NameLabel               = {
             text                = Wow.UnitOwnerName(),
             textColor           = Wow.UnitOwnerColor(),
-            location            = { Anchor("BOTTOMLEFT", 14, 2, "PredictionHealthBar"), Anchor("BOTTOMRIGHT", -14, 2, "PredictionHealthBar") },
+            location            = { Anchor("BOTTOMLEFT", 14, 2, "HealthBar"), Anchor("BOTTOMRIGHT", -14, 2, "HealthBar") },
         },
 
         Label                   = {
@@ -132,11 +132,11 @@ Style.UpdateSkin("Default",     {
             textColor           = Wow.UnitColor(),
         },
 
-        PredictionHealthBar     = {
+        HealthBar               = {
             SHARE_STATUSBAR_SKIN,
             location            = { Anchor("TOPLEFT"), Anchor("TOPRIGHT"), Anchor("BOTTOM", 0, BORDER_SIZE, "PowerBar", "TOP") },
             value               = Scorpio.IsRetail and CLEAR or Wow.UnitHealthFrequent(),
-            statusBarColor      = Scorpio.IsRetail and CLEAR or Wow.UnitConditionColor(true, Color.RED),
+            statusBarColor      = Scorpio.IsRetail and Wow.UnitColor() or Wow.UnitConditionColor(true, Color.RED),
 
             backgroundFrame     = {
                 backdropBorderColor = Wow.UnitIsTarget():Map(function(val) return val and Color.WHITE or Color.BLACK end),
@@ -199,7 +199,7 @@ Style.UpdateSkin("Default",     {
         },
 
         -- Aura Panels
-        BuffPanel               = {
+        BuffPanel               = Scorpio.UseSecretValue and nil or {
             elementType         = AshAuraPanelIcon,
             rowCount            = 3,
             columnCount         = 2,
@@ -217,7 +217,7 @@ Style.UpdateSkin("Default",     {
 
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return not _AuraBlackList[spellID] end,
         },
-        DebuffPanel             = {
+        DebuffPanel             = Scorpio.UseSecretValue and nil or {
             elementType         = AshAuraPanelIcon,
             rowCount            = 3,
             columnCount         = 2,
@@ -228,12 +228,12 @@ Style.UpdateSkin("Default",     {
             orientation         = Orientation.VERTICAL,
             topToBottom         = false,
             leftToRight         = false,
-            location            = { Anchor("BOTTOMRIGHT", 0, 0, "PredictionHealthBar") },
+            location            = { Anchor("BOTTOMRIGHT", 0, 0, "HealthBar") },
 
             auraFilter          = "HARMFUL",
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return not (_AuraBlackList[spellID] or _EnlargeDebuffList[spellID]) end,
         },
-        ClassBuffPanel          = {
+        ClassBuffPanel          = Scorpio.UseSecretValue and nil or {
             elementType         = AshClassPanelIcon,
             rowCount            = 2,
             columnCount         = 1,
@@ -244,13 +244,13 @@ Style.UpdateSkin("Default",     {
             orientation         = Orientation.HORIZONTAL,
             topToBottom         = false,
             leftToRight         = true,
-            location            = { Anchor("BOTTOM", 0, 0, "PredictionHealthBar") },
+            location            = { Anchor("BOTTOM", 0, 0, "HealthBar") },
 
             auraFilter          = "HELPFUL",
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return _ClassBuffList[name] or _ClassBuffList[spellID] end,
             visible             = AshToAsh.FromConfig():Map(function() return next(_ClassBuffList) and true or false end)
         },
-        EnlargeDebuffPanel      = {
+        EnlargeDebuffPanel      = Scorpio.UseSecretValue and nil or {
             elementType         = AshClassPanelIcon, -- no-click no-tip
             rowCount            = 2,
             columnCount         = 3,
@@ -261,7 +261,7 @@ Style.UpdateSkin("Default",     {
             orientation         = Orientation.HORIZONTAL,
             topToBottom         = true,
             leftToRight         = false,
-            location            = { Anchor("TOPRIGHT", 0, 0, "PredictionHealthBar") },
+            location            = { Anchor("TOPRIGHT", 0, 0, "HealthBar") },
 
             auraFilter          = "HARMFUL",
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return _EnlargeDebuffList[spellID] end,
