@@ -112,7 +112,10 @@ Style.UpdateSkin("Default",     {
 
     -- Indicators for Unit Frames
     [AshUnitFrame]              = {
-        alpha                   = Wow.UnitOwnerInRange():Map('v=>v and 1 or 0.5'),
+        alpha                   = Scorpio.UseSecretValue and 1 or Wow.UnitOwnerInRange():Map('v=>v and 1 or 0.5'),
+        alphaCond               = Scorpio.UseSecretValue and Wow.UnitOwnerInRange() or nil,
+        alphaIfTrue             = Scorpio.UseSecretValue and 1 or nil,
+        alphaIfFalse            = Scorpio.UseSecretValue and 0.5 or nil,
 
         -- Main Indicators
         SHARE_NAMELABEL_SKIN,
