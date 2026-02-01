@@ -81,7 +81,7 @@ Style.UpdateSkin("Default",     {
             edgeFile            = [[Interface\Buttons\WHITE8x8]],
             edgeSize            = BORDER_SIZE,
         },
-        backdropBorderColor     = Wow.FromPanelProperty("AuraDebuff"):Map(function(dtype) return AURA_PANEL_ICON_DEBUFF_COLOR[dtype] or Color.WHITE end),
+        backdropBorderColor     = Wow.UseSecretValue and Wow.FromPanelProperty("AuraColor") or Wow.FromPanelProperty("AuraDebuff"):Map(function(dtype) return AURA_PANEL_ICON_DEBUFF_COLOR[dtype] or Color.WHITE end),
 
         -- Aura Icon
         IconTexture             = {
@@ -103,7 +103,8 @@ Style.UpdateSkin("Default",     {
         Cooldown                = {
             setAllPoints        = true,
             enableMouse         = false,
-            cooldown            = Wow.FromPanelProperty("AuraCooldown"),
+            cooldown            = Scorpio.UseSecretValue and NIL or Wow.FromPanelProperty("AuraCooldown"),
+            cooldownDurationObject = Scorpio.UseSecretValue and Wow.FromPanelProperty("AuraDuration") or nil,
         },
     },
     [AshAuraPanelIcon]          = {
@@ -165,6 +166,7 @@ Style.UpdateSkin("Default",     {
                 alphaMode       = "ADD",
                 location        = { Anchor("LEFT", -16, 0, "statusBarTexture", "RIGHT"), Anchor("TOP", 0, 4), Anchor("BOTTOM", 0, -4) },
                 size            = Size(32, 32),
+                visible         = Wow.UnitCasting(),
             },
 
             Label               = {
@@ -202,7 +204,7 @@ Style.UpdateSkin("Default",     {
         },
 
         -- Aura Panels
-        BuffPanel               = Scorpio.UseSecretValue and nil or {
+        BuffPanel               = {
             elementType         = AshAuraPanelIcon,
             rowCount            = 3,
             columnCount         = 2,
@@ -220,7 +222,7 @@ Style.UpdateSkin("Default",     {
 
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return not _AuraBlackList[spellID] end,
         },
-        DebuffPanel             = Scorpio.UseSecretValue and nil or {
+        DebuffPanel             = {
             elementType         = AshAuraPanelIcon,
             rowCount            = 3,
             columnCount         = 2,
@@ -236,7 +238,7 @@ Style.UpdateSkin("Default",     {
             auraFilter          = "HARMFUL",
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return not (_AuraBlackList[spellID] or _EnlargeDebuffList[spellID]) end,
         },
-        ClassBuffPanel          = Scorpio.UseSecretValue and nil or {
+        ClassBuffPanel          = Scorpio.UseSecretValue and NIL or {
             elementType         = AshClassPanelIcon,
             rowCount            = 2,
             columnCount         = 1,
@@ -253,7 +255,7 @@ Style.UpdateSkin("Default",     {
             customFilter        = function(name, icon, count, dtype, duration, expires, caster, isStealable, nameplateShowPersonal, spellID) return _ClassBuffList[name] or _ClassBuffList[spellID] end,
             visible             = AshToAsh.FromConfig():Map(function() return next(_ClassBuffList) and true or false end)
         },
-        EnlargeDebuffPanel      = Scorpio.UseSecretValue and nil or {
+        EnlargeDebuffPanel      = Scorpio.UseSecretValue and NIL or {
             elementType         = AshClassPanelIcon, -- no-click no-tip
             rowCount            = 2,
             columnCount         = 3,
