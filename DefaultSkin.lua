@@ -9,6 +9,8 @@
 Scorpio           "AshToAsh.Skin.Default"            "1.0.0"
 --========================================================--
 
+issecretvalue                   = _G.issecretvalue or Toolset.fakefunc
+
 -----------------------------------------------------------
 -- SHARE SETTINGS
 -----------------------------------------------------------
@@ -96,7 +98,7 @@ Style.UpdateSkin("Default",     {
             drawLayer           = "OVERLAY",
             fontObject          = NumberFontNormal,
             location            = { Anchor("CENTER") },
-            text                = Wow.FromPanelProperty("AuraCount"):Map(function(val) return val and val > 1 and val or "" end),
+            text                = Wow.FromPanelProperty("AuraCount"):Map(function(val) return not issecretvalue(val) and val > 1 and val or "" end),
         },
 
         -- Duration
