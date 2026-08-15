@@ -73,10 +73,20 @@ function OnEnable(self)
         end
     end
 
-    function SpellBookFrame:OnHide()
-        IN_SPELL_BIND_MODE      = false
-        listSpellBindMasks:Each(SpellBookFrame.Hide)
+    if not IsRetail then
+        function SpellBookFrame:OnHide()
+            IN_SPELL_BIND_MODE      = false
+            listSpellBindMasks:Each(SpellBookFrame.Hide)
+        end
     end
+end
+
+__AsyncSingle__()
+function DisableBindingMode()
+    if not IsRetail then return end
+    while SpellBookFrame:IsShown() do Delay(1) end
+    IN_SPELL_BIND_MODE      = false
+    listSpellBindMasks:Each(SpellBookFrame.Hide)
 end
 
 -----------------------------------------------------------
@@ -139,6 +149,7 @@ if SpellBookFrame then
                 mask:Hide()
             end
         end
+        DisableBindingMode()
     end
 else
     function GetMaskSpellID(self)
@@ -171,6 +182,7 @@ else
                 mask:Hide()
             end
         end)
+        DisableBindingMode()
     end
 end
 
